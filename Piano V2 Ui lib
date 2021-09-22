@@ -533,7 +533,7 @@ function library.new(name)
 					SectionUI:Resize()
 				end
 
-				function SectionUI.Toggle(name,callback)
+				function SectionUI.Toggle(name,default,callback)
 					local ToggleHolder = Instance.new("Frame")
 					local ToggleText = Instance.new("TextLabel")
 					local UIPadding = Instance.new("UIPadding")
@@ -577,7 +577,12 @@ function library.new(name)
 					ToggleButton.TextSize = 25.000
 					ToggleButton.TextTransparency = 1.000
 					
-					local Toggled = false;
+					local Toggled = default;
+					if Toggled then
+						ToggleButton.TextTransparency = 0
+					else
+						ToggleButton.TextTransparency = 1.000
+					end
 						
 					local tweenInfo = TweenInfo.new(.15,Enum.EasingStyle.Linear,Enum.EasingDirection.InOut,0,false,0)
 						
