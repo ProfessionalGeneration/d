@@ -60,7 +60,7 @@ function library.new(name)
 	TabHolder.Position = UDim2.new(0.211438477, 0, -4.76837158e-07, 0)
 	TabHolder.Size = UDim2.new(0, 455, 0, 32)
 	TabHolder.Visible = true
-	TabHolder.ZIndex = 2
+	TabHolder.ZIndex = 7
 
 	UIPadding.Parent = TabHolder
 	UIPadding.PaddingLeft = UDim.new(0, 3)
@@ -819,7 +819,7 @@ function library.new(name)
 					ToggleButton.Position = UDim2.new(0.944999993, 0, 0.219999999, 0)
 					ToggleButton.Rotation = 90.000
 					ToggleButton.Size = UDim2.new(0, 15, 0, 15)
-					ToggleButton.ZIndex = 190
+					ToggleButton.ZIndex = 6
 					ToggleButton.Image = "http://www.roblox.com/asset/?id=4888315295"
 					ToggleButton.ImageColor3 = Color3.fromRGB(80, 80, 80)
 					ToggleButton.SliceCenter = Rect.new(100, 100, 100, 100)
