@@ -313,7 +313,7 @@ function library.new(name)
 				SectionTitle.BorderSizePixel = 0
 				SectionTitle.LayoutOrder = 1
 				SectionTitle.Size = UDim2.new(0, 442,0, 23)
-				SectionTitle.ZIndex = 3
+				SectionTitle.ZIndex = 7
 				SectionTitle.Font = Enum.Font.SourceSans
 				SectionTitle.Text = name
 				SectionTitle.TextColor3 = Color3.fromRGB(198, 198, 198)
@@ -332,7 +332,7 @@ function library.new(name)
 				Underline.LayoutOrder = 2
 				Underline.Position = UDim2.new(0.00894965976, 0, 0.100877196, 0)
 				Underline.Size = UDim2.new(0, 433, 0, 3)
-				Underline.ZIndex = 4
+				Underline.ZIndex = 6
 				Underline.Image = "rbxassetid://3570695787"
 				Underline.ImageColor3 = Color3.fromRGB(59, 59, 59)
 				Underline.ScaleType = Enum.ScaleType.Slice
