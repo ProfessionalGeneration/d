@@ -819,7 +819,7 @@ function library.new(name)
 					ToggleButton.Position = UDim2.new(0.944999993, 0, 0.219999999, 0)
 					ToggleButton.Rotation = 90.000
 					ToggleButton.Size = UDim2.new(0, 15, 0, 15)
-					ToggleButton.ZIndex = 5
+					ToggleButton.ZIndex = 190
 					ToggleButton.Image = "http://www.roblox.com/asset/?id=4888315295"
 					ToggleButton.ImageColor3 = Color3.fromRGB(80, 80, 80)
 					ToggleButton.SliceCenter = Rect.new(100, 100, 100, 100)
