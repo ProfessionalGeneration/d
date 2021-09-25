@@ -580,8 +580,10 @@ function library.new(name)
 					local Toggled = default;
 					if Toggled then
 						ToggleButton.TextTransparency = 0
+						Toggled = true
 					else
 						ToggleButton.TextTransparency = 1.000
+						Toggled = false
 					end
 						
 					local tweenInfo = TweenInfo.new(.15,Enum.EasingStyle.Linear,Enum.EasingDirection.InOut,0,false,0)
