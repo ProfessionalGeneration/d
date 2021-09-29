@@ -421,7 +421,7 @@ function library.new(name)
 					Button.TextSize = 20.000
 
 					Circle.Name = "Circle"
-					Circle.Parent = game:GetService("CoreGui")
+					Circle.Parent = game:GetService("CoreGui"):WaitForChild("Piano UIs")
 					Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					Circle.BackgroundTransparency = 1.000
 					Circle.ZIndex = 10
@@ -431,7 +431,7 @@ function library.new(name)
 
 					function CircleClick(Button, X, Y)
 						coroutine.resume(coroutine.create(function()
-						local Circle = game:GetService("CoreGui"):WaitForChild("Circle"):Clone()
+						local Circle = game:GetService("CoreGui"):WaitForChild("Piano UIs"):WaitForChild("Circle"):Clone()
 						Circle.Parent = Button
 						local NewX = X - Circle.AbsolutePosition.X
 						local NewY = Y - Circle.AbsolutePosition.Y
