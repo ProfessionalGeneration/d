@@ -430,7 +430,7 @@ function library.new(name)
 					Circle.ImageTransparency = 0.700
 
 					function CircleClick(Button, X, Y)
-						coroutine.resume(coroutine.create(function()
+						coroutine.wrap(function()
 						local Circle = game:GetService("CoreGui"):WaitForChild("Piano UIs"):WaitForChild("Circle"):Clone()
 						Circle.Parent = Button
 						local NewX = X - Circle.AbsolutePosition.X
@@ -453,7 +453,7 @@ function library.new(name)
 									wait(Time/10)
 								end
 							Circle:Destroy()
-						end))
+						end)()
 					end
 							
 					local Mouse = game.Players.LocalPlayer:GetMouse()
