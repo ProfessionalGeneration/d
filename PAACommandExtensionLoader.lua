@@ -3,7 +3,7 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local sahit
 local mrh = {"Head","HumanoidRootPart"}
 local plrs = {}
-getgenv().var = {}
+getgenv().varggg = {}
 for i,v in pairs(LocalPlayer.Parent:GetPlayers()) do
     table.insert(plrs,v)
 end
@@ -20,12 +20,12 @@ LocalPlayer.Parent.PlayerRemoving:Connect(function(v)
 end)
 old = hookmetamethod(game,'__namecall',function(s,...)
     local args = {...}
-    if var.autoreload and getnamecallmethod() == "FireServer" and tostring(s):lower():find("shootevent") then
+    if varggg.autoreload and getnamecallmethod() == "FireServer" and tostring(s):lower():find("shootevent") then
         require(args[2]:FindFirstChild("GunStates")).CurrentAmmo = tonumber(require(args[2]:FindFirstChild("GunStates")).MaxAmmo) + 1
         game:GetService("ReplicatedStorage").ReloadEvent:FireServer(args[2])
         return old(s,...) 
     end
-    if var.silentaim and getnamecallmethod() == "FindPartOnRay" and tostring(getcallingscript()) == "GunInterface" and sahit ~= nil then
+    if varggg.silentaim and getnamecallmethod() == "FindPartOnRay" and tostring(getcallingscript()) == "GunInterface" and sahit ~= nil then
         return sahit.Character[mrh[math.random(1,2)]],sahit.Character:GetPivot().p
     end 
     return old(s,...)    
