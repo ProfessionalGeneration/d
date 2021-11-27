@@ -23,6 +23,7 @@ local function respawnondeath(g)
                     ot = character:FindFirstChildWhichIsA("Tool").Name
                 end
                 workspace.Remote.loadchar:InvokeServer(LocalPlayer,LocalPlayer.TeamColor.Color)
+                workspace.Camera.CFrame = c
                 task.spawn(function()
                     wait(.9)
                     if type(ot) ~= "nil" and not LocalPlayer.Parent[tostring(character)].Backpack:FindFirstChild(ot) then
