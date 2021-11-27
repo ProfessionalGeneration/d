@@ -9,9 +9,11 @@ getgenv().varggg = {}
 
 -- cool functions, where did you find them
 
-local function respawnondeath(character)
+local function respawnondeath(g)
+    pcall(function()
+    	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:wait()
         local d
-        d = character:FindFirstChildWhichIsA("Humanoid").Died:Connect(function()
+        d = character:WaitForChild("Humanoid").Died:Connect(function()
             d:Disconnect()
             if varggg.autorespawn then
                 local c = workspace.Camera.CFrame
@@ -20,7 +22,7 @@ local function respawnondeath(character)
                 if character:FindFirstChildWhichIsA("Tool") and character:FindFirstChildWhichIsA("Tool"):FindFirstChild("GunInterface") then
                     ot = character:FindFirstChildWhichIsA("Tool").Name
                 end
-                workspace.Remote.loadchar:InvokeServer(LocalPlayer,LocalPlayer.TeamColor)
+                workspace.Remote.loadchar:InvokeServer(LocalPlayer,LocalPlayer.TeamColor.Color)                
                 workspace:WaitForChild(tostring(character)):PivotTo(bp)
                 workspace.Camera.CFrame = c
                 if type(ot) ~= "nil" and type(ot) == type("im gonna pee YOUR pants") then
@@ -30,7 +32,10 @@ local function respawnondeath(character)
                 end
             end
         end)
+    end)
 end
+
+LocalPlayer.CharacterAdded:Connect(respawnondeath)
 
 -- players
 
