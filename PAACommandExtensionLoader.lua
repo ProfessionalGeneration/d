@@ -22,11 +22,16 @@ local function respawnondeath(g)
                 if character:FindFirstChildWhichIsA("Tool") and character:FindFirstChildWhichIsA("Tool"):FindFirstChild("GunInterface") then
                     ot = character:FindFirstChildWhichIsA("Tool").Name
                 end
-                workspace.Remote.loadchar:InvokeServer(LocalPlayer,LocalPlayer.TeamColor.Color)                
+                workspace.Remote.loadchar:InvokeServer(LocalPlayer,LocalPlayer.TeamColor.Color)
+                task.spawn(function()
+                    wait(.9)
+                    if type(ot) ~= "nil" and not LocalPlayer.Parent[tostring(character)].Backpack:FindFirstChild(ot) then
+                        workspace.Remote.ItemHandler:InvokeServer(workspace.Prison_ITEMS.giver[ot].ITEMPICKUP)
+                    end
+                end)
                 workspace:WaitForChild(tostring(character)):PivotTo(bp)
                 workspace.Camera.CFrame = c
-                if type(ot) ~= "nil" and type(ot) == type("im gonna pee YOUR pants") then
-                    workspace.Remote.ItemHandler:InvokeServer(workspace.Prison_ITEMS.giver[ot].ITEMPICKUP)
+                if type(ot) ~= "nil" and type(ot) == type("im gonna pee YOUR pants") and gst then
                     LocalPlayer.Parent[tostring(character)].Backpack:WaitForChild(ot)
                     LocalPlayer.Parent[tostring(character)].Backpack[ot].Parent = workspace[tostring(character)]
                 end
