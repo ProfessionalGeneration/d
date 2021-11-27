@@ -10,7 +10,6 @@ getgenv().varggg = {}
 -- cool functions, where did you find them
 
 local function respawnondeath(character)
-    pcall(function()
         local d
         d = character:FindFirstChildWhichIsA("Humanoid").Died:Connect(function()
             d:Disconnect()
@@ -31,7 +30,6 @@ local function respawnondeath(character)
                 end
             end
         end)
-    end)
 end
 
 -- players
