@@ -33,7 +33,7 @@ end)
 while true do
     local __ = math.huge
     for i,v in ipairs(plrs) do
-        if v ~= LocalPlayer and LocalPlayer.Parent:FindFirstChild(tostring(v)) and workspace:FindFirstChild(tostring(v)) and v.Character:FindFirstChildWhichIsA("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChildWhichIsA("Humanoid").Health ~= 0 then
+        if v ~= LocalPlayer and LocalPlayer.Parent:FindFirstChild(tostring(v)) and workspace:FindFirstChild(tostring(v)) and v.Character:FindFirstChildWhichIsA("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChildWhichIsA("Humanoid").Health ~= 0 and v.Team ~= LocalPlayer.Team then
             local m = game:GetService("UserInputService"):GetMouseLocation()
             local p,c = workspace.Camera:WorldToViewportPoint(v.Character:GetPivot().p)
             if c then
