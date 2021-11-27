@@ -32,7 +32,7 @@ local function respawnondeath(g)
                 end)
                 workspace:WaitForChild(tostring(character)):PivotTo(bp)
                 workspace.Camera.CFrame = c
-                if type(ot) ~= "nil" and type(ot) == type("im gonna pee YOUR pants") and gst then
+                if type(ot) ~= "nil" and type(ot) == type("im gonna pee YOUR pants") then
                     LocalPlayer.Parent[tostring(character)].Backpack:WaitForChild(ot)
                     LocalPlayer.Parent[tostring(character)].Backpack[ot].Parent = workspace[tostring(character)]
                 end
