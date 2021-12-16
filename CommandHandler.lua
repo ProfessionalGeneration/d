@@ -1,6 +1,6 @@
 -- How to use
 --[[
-    local CHLib = loadstring(game:HttpGet url)()
+    local CHLib = loadstring(game:HttpGet'https://github.com/GFXTI/d/blob/main/CommandHandler.lua')()
     
     CHLib:AddCommand("Print", -- main command name
     {"p"}, -- aliases
