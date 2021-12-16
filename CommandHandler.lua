@@ -1,6 +1,6 @@
 -- How to use
 --[[
-    local CHLib = loadstring(game:HttpGet'https://github.com/GFXTI/d/blob/main/CommandHandler.lua')()
+    local CHLib = loadstring(game:HttpGet'https://raw.githubusercontent.com/GFXTI/d/main/CommandHandler.lua')()
     
     CHLib:AddCommand("Print", -- main command name
     {"p"}, -- aliases
@@ -82,6 +82,34 @@ function CH:AddCommand(Command, Aliases, Info, Function) -- if you like function
     Final["Function"] = Function
     
     table.insert(CH.Commands,Final)    
+end
+            
+function CH:UpdateCommand(Command, Aliases, Info, Function)
+    assert(type(Command) == "string", "1st Argument to AddCommand is not a string")
+    assert(type(Aliases) == "table", "2nd Argument to AddCommand is not a table")
+    assert(type(Info) == "string", "3rd Argument to AddCommand is not a string")
+    assert(type(Function) == "function", "4th Argument to AddCommand is not a function")
+    
+    local function Update(Table)
+        Table["Aliases"] = Aliases
+        Table["Info"] = Info
+        Table["Function"] = Function
+    end 
+    
+    for i,v in pairs(CH.Command) do
+        if type(Command) == "table" then
+            if v == Command then
+                Update(v)
+                break
+            end
+        end
+        
+        if type(Command) == "string" then
+            if v["Command"] == Command then
+                Update(v)
+            end
+        end
+    end
 end
 
 function CH:RemoveCommand(ToRemove)
