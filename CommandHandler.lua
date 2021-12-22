@@ -8,6 +8,8 @@
     function(Args) table.foreach(args,print) end)
 
     CHLib:RemoveCommand("Print") or CHLib:RemoveCommand(CHLib.Commands[1])
+    
+    CHLib:ChangeConfiguration("Prefix",".")
 ]]
 
 -- Variables
@@ -20,9 +22,6 @@ CH.Configuration.Split = "|" -- if you ever use multiple commands
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
-local hook = hookmetamethod
-local oldhook
 
 -- Command Handler functions (important)
 
@@ -47,6 +46,10 @@ function CH:FindCommand(String)
     return check, table
 end
 
+function CH:ChangeConfiguration(Setting,ChangeTo)
+    CH.Configuration[Setting] = ChangeTo
+end
+
 function CH:AddCommand(Command, Aliases, Info, Function) -- if you like functions better
     assert(type(Command) == "string", "1st Argument to AddCommand is not a string")
     assert(type(Aliases) == "table", "2nd Argument to AddCommand is not a table")
@@ -62,7 +65,7 @@ function CH:AddCommand(Command, Aliases, Info, Function) -- if you like function
     
     table.insert(CH.Commands,Final)    
 end
-            
+
 function CH:UpdateCommand(Command, Aliases, Info, Function)
     assert(type(Command) == "string", "1st Argument to AddCommand is not a string")
     assert(type(Aliases) == "table", "2nd Argument to AddCommand is not a table")
