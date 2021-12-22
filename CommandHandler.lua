@@ -141,3 +141,5 @@ LocalPlayer.Chatted:Connect(function(msg)
     end
 
 end)
+
+return CH
