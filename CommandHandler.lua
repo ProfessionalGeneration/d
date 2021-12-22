@@ -14,7 +14,6 @@
 
 local CH = {}
 CH.Configuration = {}
-CH.cc = {}
 CH.Commands = {}
 CH.Configuration.Prefix = "-"
 CH.Configuration.Split = "|" -- if you ever use multiple commands
@@ -24,26 +23,6 @@ local LocalPlayer = Players.LocalPlayer
 
 local hook = hookmetamethod
 local oldhook
-
--- Misc functions for you to use
-
-function CH.cc:GetPlayer(String)
-    for _,Player in pairs(Players:GetPlayers()) do
-        if Player.Name:lower():find(String:lower()) then
-            return Player
-        end
-    end
-end
-
-function CH.cc:PlayerExists(String)
-    if Players:FindFirstChild(String) and game:GetService("Workspace"):FindFirstChild(String) then
-        return true
-    end
-end
-
-function CH.cc:RayCast(From,To,Ignore)
-    return game:GetService("Workspace"):Raycast(From,To,Ignore)    
-end
 
 -- Command Handler functions (important)
 
