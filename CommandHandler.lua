@@ -137,7 +137,7 @@ function CH:HandleMessage(msg,plr)
                 table.remove(args,1)
                 
                 if found and plr == LocalPlayer or cmdtable.IsUsableByOthers then
-                    task.spawn(function()cmdtable["Function"](args)end)
+                    task.spawn(function()cmdtable["Function"](args,plr)end)
                 end
                 
             end
