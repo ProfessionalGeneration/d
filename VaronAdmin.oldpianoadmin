@@ -11,6 +11,16 @@ local tp = game:GetService("TeleportService")
 local plrs = game:GetService("Players")
 local tween = game:GetService("TweenService")
 local repstor = game:GetService("ReplicatedStorage")
+local coregui = game:GetService("CoreGui")
+
+-- // uis
+
+local cmdsfornow = Instance.new("ScreenGui",coregui)
+local Frame = Instance.new("Frame",cmdsfornow)
+local ScrollingFrame = Instance.new("ScrollingFrame",Frame)
+local UIPadding = Instance.new("UIPadding",ScrollingFrame)
+local UIGridLayout = Instance.new("UIGridLayout",ScrollingFrame)
+local _1 = Instance.new("TextLabel",ScrollingFrame)
 
 -- // localplayer
 
@@ -76,6 +86,94 @@ end
 
 local function TweenCharacter(Position,Speed)
     tween:Create(chr.HumanoidRootPart,TweenInfo.new(Speed or 1),{CFrame = Position}):Play()
+end
+
+-- // on spawn function
+
+local function OnSpawn(char)
+    chr = char
+    hum = char:WaitForChild("Humanoid")
+    
+    local connections = {}
+    connections.died = nil
+    connections.walkspeed = nil
+    connections.jumppower = nil
+    
+    connections.walkspeed = hum.Changed:Connect(function()
+        if Config.WalkSpeed and Config.WalkSpeed ~= 16 then
+            hum.WalkSpeed = Config.WalkSpeed
+        end
+    end)
+    
+    connections.jumppower = hum.Changed:Connect(function()
+        if Config.JumpPower and Config.JumpPower ~= 16 then
+            hum.JumpPower = Config.JumpPower
+        end
+    end)
+    
+    if Toggles.AutoJet then
+        Intsance.new("Model",chr:WaitForChild('Util')).Name = "Jetpack"
+    end
+    
+    if Toggles.DiedTeleport and OldPosition then
+        TweenCharacter(OldPosition,.1)
+    end
+    
+    connections.died = hum.Died:Connect(function()
+        OldPosition = chr:GetPivot()
+        for i,v in pairs(connections) do
+            v:Disconnect()
+        end
+    end)
+end
+
+-- // ui functions
+
+local function AddCommandToUi(addtable)
+	local CommandName = Instance.new("TextButton",ScrollingFrame)
+	local UITextSizeConstraint = Instance.new("UITextSizeConstraint",CommandName)
+
+	CommandName.Name = "CommandName"
+	CommandName.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+	CommandName.BackgroundTransparency = 1.000
+	CommandName.Position = UDim2.new(0.378048778, 0, 3.67239217e-08, 0)
+	CommandName.Size = UDim2.new(0, 151, 0, 60)
+	CommandName.Font = Enum.Font.GothamSemibold
+	CommandName.TextColor3 = Color3.fromRGB(0, 0, 0)
+	CommandName.TextScaled = true
+	CommandName.TextSize = 19.000
+	CommandName.TextWrapped = true
+
+	UITextSizeConstraint.MaxTextSize = 50
+	UITextSizeConstraint.MinTextSize = 14
+	
+	local final = ""
+	for i,v in pairs(addtable["Aliases"]) do
+		final = final..v.." "
+	end
+	
+	CommandName.Text = addtable["Command"].." ( "..final..")"
+
+	CommandName.MouseEnter:Connect(function()
+		CommandName.Text = addtable["Info"]
+	end)
+
+	CommandName.MouseLeave:Connect(function()
+		CommandName.Text = addtable["Command"].." ( "..final..")"
+	end)
+
+	CommandName.Activated:Connect(function()
+		addtable["Function"]()
+		CommandName.Text = "Executed!"
+	    task.wait(1)
+        if CommandName.Text == "Executed!" then
+            CommandName.Text = addtable["Command"].." ( "..final..")"
+	    end
+	end)
+end
+
+local function AdjustCommandCanvasSize(int)
+    ScrollingFrame.CanvasSize = UDim2.new(0,0,int*.059,0)
 end
 
 -- // auto buy ammo funcion 
@@ -181,6 +279,14 @@ local function UpdatePlayerESP(updatetable)
                 local tfromtorso = workspace.Camera:WorldToViewportPoint(chr.HumanoidRootPart:GetPivot().p or chr.PrimaryPart:GetPivot().p or Vector3.new(0,0,0))
                 local screenpoint = workspace.Camera:WorldToScreenPoint(Character.Head:GetPivot().p or Vector3.new(0,0,0))
                 
+                if vis and IsAlive() then 
+                    text.Visible = Toggles.PlayerESP
+                    tracer.Visible = (Toggles.Tracers and Toggles.PlayerESP == true)
+                else
+                    tracer.Visible = false
+                    text.Visible = false
+                end
+                
                 text.Text = (Player.Name or "").." ["..math.round(Character:FindFirstChild("Humanoid").Health).."/"..Character:FindFirstChild("Humanoid").MaxHealth.."]\nItem: "..tostring(Character:FindFirstChildWhichIsA("Tool")).." Job: "..Player.Job.Value.."\nCash: "..tostring(Player.PlayerData.Currency.Value).." Aureus: "..tostring(Player.PlayerData.PCurrency.Value).."\nKarma: "..tostring(Player.PlayerData.Karma.Value).." Distance: "..tostring(math.round((chr:GetPivot().p-Character:GetPivot().p).magnitude))
                 text.Position = Vector2.new(pos.x,screenpoint.y)
                 text.Color = GetColor()
@@ -194,14 +300,6 @@ local function UpdatePlayerESP(updatetable)
                     tracer.From = Vector2.new(tfromtorso.x,tfromtorso.y)
                 else
                     tracer.From = uis:GetMouseLocation()
-                end
-                
-                if vis and IsAlive() then 
-                    text.Visible = Toggles.PlayerESP
-                    tracer.Visible = (Toggles.Tracers and Toggles.PlayerESP == true)
-                else
-                    tracer.Visible = false
-                    text.Visible = false
                 end
                 
             end
@@ -258,6 +356,40 @@ local function GetClosestToMouse()
     return closest
 end
 
+-- // commands ui
+
+cmdsfornow.Name = "cmdsfornow"
+cmdsfornow.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(.91, 0, 0, 0)
+Frame.Size = UDim2.new(0, 176, 0, workspace.Camera.ViewportSize.Y-36)
+
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ScrollingFrame.BackgroundTransparency = 1.000
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Position = UDim2.new(0.0314830467, 0, -0.000261070352, 0)
+ScrollingFrame.Size = UDim2.new(0, 164, 0, workspace.Camera.ViewportSize.Y-36)
+ScrollingFrame.ScrollBarThickness = 0
+
+UIPadding.PaddingTop = UDim.new(0, 5)
+
+UIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayout.CellSize = UDim2.new(0, 150, 0, 50)
+
+_1.Name = "1"
+_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+_1.BackgroundTransparency = 1.000
+_1.BorderSizePixel = 0
+_1.Position = UDim2.new(-0.0426829271, 0, 0.00616522832, 0)
+_1.Size = UDim2.new(0, 176, 0, 50)
+_1.Font = Enum.Font.Gotham
+_1.Text = "Varon Commands"
+_1.TextColor3 = Color3.fromRGB(0, 0, 0)
+_1.TextSize = 18.000
+
 -- // auto reload 
 
 AutoReloadBind.Event:Connect(function(ammotype,maxammo,gun)
@@ -276,49 +408,22 @@ end)
 
 -- // update character
 
-lp.CharacterAdded:Connect(function(char)
-    chr = char
-    hum = char:WaitForChild("Humanoid")
-    
-    local connections = {}
-    connections.died = nil
-    connections.walkspeed = nil
-    connections.jumppower = nil
-    
-    connections.walkspeed = hum.Changed:Connect(function()
-        if Config.WalkSpeed and Config.WalkSpeed ~= 16 then
-            hum.WalkSpeed = Config.WalkSpeed
-        end
-    end)
-    
-    connections.jumppower = hum.Changed:Connect(function()
-        if Config.JumpPower and Config.JumpPower ~= 16 then
-            hum.JumpPower = Config.JumpPower
-        end
-    end)
-    
-    if Toggles.AutoJet then
-        Intsance.new("Model",chr:WaitForChild('Util')).Name = "Jetpack"
-    end
-    
-    if Toggles.DiedTeleport and OldPosition then
-        TweenCharacter(OldPosition,.1)
-    end
-    
-    connections.died = hum.Died:Connect(function()
-        OldPosition = chr:GetPivot()
-        for i,v in pairs(connections) do
-            v:Disconnect()
-        end
-    end)
-end)
+OnSpawn(chr)
+lp.CharacterAdded:Connect(OnSpawn)
 
 -- // anti nlr
 
 workspace.ChildAdded:Connect(function(Item)
     if Item.Name == "NL" and Toggles.AntiNlr then
-        task.wait()
         Item:Destroy()
+    end
+end)
+
+-- // infinite hunger
+
+lp.PlayerData.Hunger.Changed:Connect(function()
+    if Toggles.InfiniteHunger then
+        lp.PlayerData.Hunger.Value = 100
     end
 end)
 
@@ -351,9 +456,8 @@ end)
 -- // silent aim
 
 task.spawn(function()
-    while true do 
+    while task.wait(.25) do 
         ClosestToMouse = GetClosestToMouse()
-        task.wait(.25)
     end
 end)
 
@@ -393,23 +497,29 @@ runservice.RenderStepped:Connect(function()
     end
 end)
 
+-- // noclip
+
+runservice.Stepped:Connect(function()
+    if Toggles.Noclip then
+        pcall(function()
+            for i,v in pairs(chr:GetDescendants()) do
+                v.CanCollide = false
+            end
+        end)
+    end
+end)
+
 -- // metamtehods
 
 oldnamecall = hookfunction(mt.__namecall,newcclosure(function(Self,...)
     local args = {...}
     local method = getnamecallmethod()
     
-    -- // silent aim things
+    -- // silent aim
     
     if Toggles.SilentAim and method == "FireServer" and tostring(Self) == 'MenuActionEvent' and args[1] == 33 and ClosestToMouse ~= nil and ClosestToMouse.Character:FindFirstChild("Humanoid") then
         args[3] = ClosestToMouse.Character:GetPivot()
         args[5] = ClosestToMouse.Character.Humanoid
-        return Self.FireServer(Self,unpack(args))
-    end
-   
-    if method == "FireServer" and tostring(Self) == 'ToolsEvent' and args[1] == 19 and ClosestToMouse ~= nil and ClosestToMouse.Character:FindFirstChild("Humanoid") then
-        args[2] = ClosestToMouse.Character:GetPivot().p
-        args[3] = v.Character
         return Self.FireServer(Self,unpack(args))
     end
     
@@ -571,15 +681,35 @@ CH:AddCommand("autojet",{'aj'},"you spawn with an invisible jet on",function()
 end)
 
 CH:AddCommand("Commands",{"cmds"},"Gives a list of every command you can use and their prefixes",function()
-    table.foreach(CH.Commands,function(i,v)
-        local final = ""
-        final = final..v["Command"].." | "
-        final = final..v["Info"].." | ".."{ "
-        table.foreach(v["Aliases"],function(i,v)
-            final = final..v.." "
-        end)
-        final = final.."}"
-        print(final)
-    end)
+    if Frame.Visible then
+        table.foreach(ScrollingFrame:GetChildren(),function(_,v)pcall(function()v.Visible=false end)end)
+        tween:Create(Frame,TweenInfo.new(2),{Transparency = 1, Size = UDim2.new(0, 176, 0, 0)}):Play()
+        task.wait(2.1)
+        Frame.Visible = false
+    else
+        Frame.Visible = true
+        tween:Create(Frame,TweenInfo.new(2),{Transparency = 0, Size = UDim2.new(0, 176, 0, workspace.Camera.ViewportSize.Y-36)}):Play()
+        table.foreach(ScrollingFrame:GetChildren(),function(_,v)pcall(function()v.Visible=true end)end)
+    end
 end)
 
+CH:AddCommand("InfiniteHunger",{'ih','infhung'},"Makes your hunger maxed out",function()
+    local toggle = not Toggles.InfiniteHunger
+    Toggles.InfiniteHunger = toggle
+    
+    if toggle then
+        lp.PlayerData.Hunger.Value = 100
+    end
+end)
+
+CH:AddCommand("noclip",{'nocolisions','nc'},"Makes you able to walk through walls",function()
+    Toggles.Noclip = not Toggles.Noclip
+end)
+
+-- // add commands to ui
+
+for _,table in pairs(CH.Commands) do
+    AddCommandToUi(table)
+end
+
+AdjustCommandCanvasSize(#CH.Commands)
