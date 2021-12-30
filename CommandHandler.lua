@@ -136,7 +136,7 @@ function CH:HandleMessage(msg,plr)
                 local found, cmdtable = CH:FindCommand(firstarg)
                 table.remove(args,1)
                 
-                if found and plr == LocalPlayer or cmdtable.IsUsableByOthers then
+                if found and plr == LocalPlayer or (cmdtable.IsUsableByOthers or false) then
                     task.spawn(function()cmdtable["Function"](args,plr)end)
                 end
                 
