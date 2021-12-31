@@ -117,7 +117,7 @@ function CH:RemoveCommand(ToRemove)
 end
 
 function CH:HandleMessage(msg,plr)
-    if table.find(CH.GivenAdmin,plr) then
+    if plr == nil or table.find(CH.GivenAdmin,plr) then
         pcall(function()
             local commandamount = msg:split(tostring(CH.Configuration.Split))
             local prefix = tostring(CH.Configuration.Prefix)
