@@ -1,1 +1,9 @@
-print'hi'
+repeat wait() until game:IsLoaded()
+
+wait(1)
+
+game.Players.LocalPlayer.Character:WaitForChild("Humanoid").WalkSpeed = 17 -- if you still exploit in this game you deserve this.
+
+wait(1)
+
+game.TeleportService:Teleport(game.PlaceId)
