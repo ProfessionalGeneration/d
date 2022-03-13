@@ -699,6 +699,6 @@ function t:Library()
     end
     
     return UI
-end)
+end
 
 return t
