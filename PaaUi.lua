@@ -153,6 +153,127 @@ function t:Library()
         end
     end)
     
+    function UI:Note(title,desc,t)
+        task.spawn(function()
+            local Note = Instance.new("Frame")
+            local UICorner = Instance.new("UICorner")
+            local Main = Instance.new("TextButton")
+            local Info = Instance.new("TextButton")
+            local Countdown = Instance.new("TextButton")
+            
+            local close = Instance.new("BindableEvent")
+            local mouseover = false
+            local del = false
+            local con
+            local vp = workspace.Camera.ViewportSize
+            
+            Note.Name = "Note"
+            Note.Parent = PaaUi
+            Note.BackgroundColor3 = Color3.fromRGB(0, 85, 127)
+            Note.Position = UDim2.new(0,vp.X+215,vp.Y-240)
+            Note.Size = UDim2.new(0, 215, 0, 94)
+            
+            UICorner.CornerRadius = UDim.new(0, 4)
+            UICorner.Parent = Note
+            
+            Main.Name = "Main"
+            Main.Parent = Note
+            Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Main.BackgroundTransparency = 1.000
+            Main.Position = UDim2.new(0.0372093022, 0, 0, 0)
+            Main.Size = UDim2.new(0, 149, 0, 28)
+            Main.Font = Enum.Font.SourceSansBold
+            Main.Text = tostring(title)
+            Main.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Main.TextScaled = true
+            Main.TextSize = 14.000
+            Main.TextStrokeTransparency = 0.500
+            Main.TextWrapped = true
+            Main.TextXAlignment = Enum.TextXAlignment.Left
+            
+            Info.Name = "Info"
+            Info.Parent = Note
+            Info.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Info.BackgroundTransparency = 1.000
+            Info.Position = UDim2.new(0, 0, 0.388888747, 0)
+            Info.Size = UDim2.new(0, 215, 0, 57)
+            Info.Font = Enum.Font.SourceSansLight
+            Info.Text = tostring(desc)
+            Info.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Info.TextScaled = true
+            Info.TextSize = 14.000
+            Info.TextStrokeTransparency = 0.800
+            Info.TextWrapped = true
+            
+            Countdown.Name = "Countdown"
+            Countdown.Parent = Note
+            Countdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Countdown.BackgroundTransparency = 1.000
+            Countdown.Position = UDim2.new(0.730232596, 0, 0.0106382985, 0)
+            Countdown.Size = UDim2.new(0, 58, 0, 25)
+            Countdown.Font = Enum.Font.SourceSansBold
+            Countdown.Text = tostring(t)
+            Countdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Countdown.TextScaled = true
+            Countdown.TextSize = 14.000
+            Countdown.TextStrokeTransparency = 0.500
+            Countdown.TextWrapped = true
+            
+            local function count()
+                task.spawn(function()
+                    for i = 1,t+1 do
+                        if mouseover or del then
+                            break
+                        end
+                        if i == (t+1) then
+                            close:Fire()
+                            break
+                        end
+                        task.wait(1)
+                        if not mouseover and not del then
+                            Countdown.Text = tostring(t - i)
+                        end
+                    end
+                end)
+            end
+            
+            local function delete()
+                game:GetService("TweenService"):Create(Note,TweenInfo.new(.5,Enum.EasingStyle.Quad),{Position = Note.Position + UDim2.new(0,vp.X+215,0,0)}):Play()
+                task.wait(.5)
+                Note:Destroy()
+                con:Disconnect()
+                del = true
+            end
+            
+            game:GetService("TweenService"):Create(Note,TweenInfo.new(.8,Enum.EasingStyle.Quad),{Position = UDim2.new(0,vp.X-250,0,vp.Y-240)}):Play()
+            
+            Note.MouseEnter:Connect(function()
+                mouseover = true
+                Countdown.Text = tostring(t)
+            end)
+            
+            Note.MouseLeave:Connect(function()
+                mouseover = false
+                count()
+            end)
+            
+            Countdown.Activated:Connect(delete)
+            Info.Activated:Connect(delete)
+            Main.Activated:Connect(delete)
+            
+            con = PaaUi.ChildAdded:Connect(function(t)
+                if t.Name == "Note" then
+                    game:GetService("TweenService"):Create(Note,TweenInfo.new(.2,Enum.EasingStyle.Quad),{Position = Note.Position - UDim2.new(0,0,0,100)}):Play()
+                end
+            end)
+            
+            count()
+            
+            close.Event:Wait()
+            delete()
+        end)
+    end
+    
     function UI:Tab(Name)
     	local self = {}
     
@@ -776,13 +897,14 @@ function t:Library()
 end
 
 return t
-
 --[[
+
+local main = t:Library()
 
 local tab = main:Tab("misc")
 
 local fb = tab:Button("Hi",function()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId,game.JobId)
+
 end)
 
 fb:Call()
@@ -790,8 +912,6 @@ fb:Call()
 local tog = tab:Toggle("Toggle thing",true,function(b)
     print(b)
 end)
-
-tog:Call() or tog:Call(true or false)
 
 local drop = tab:Dropdown("b","Hi",{"hi","bye"},function(g)
     print(g)
@@ -822,4 +942,9 @@ local newtab = main:Tab("the sequal")
 newtab:Toggle("your mother",false,function(h)
     print(h)
 end)
+
+main:Note("njigger","NIUGEGER",5)
+wait(1)
+main:Note("g","g",90)
+
 ]]
