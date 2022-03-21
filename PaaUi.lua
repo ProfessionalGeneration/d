@@ -46,6 +46,7 @@ function t:Library()
     Tabs.Size = UDim2.new(0, 153, 0, 318)
     Tabs.SizeConstraint = Enum.SizeConstraint.RelativeYY
     Tabs.ScrollBarThickness = 3
+	Tabs.CanvasSize = UDim2.new(0,0,10,0)
     Tabs.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
     
     UIListLayout.Parent = Tabs
@@ -307,6 +308,7 @@ function t:Library()
         TabName.BorderSizePixel = 0
         TabName.Position = UDim2.new(0.250633687, 0, 0.146214098, 0)
         TabName.Size = UDim2.new(0, 505, 0, 317)
+		TabName.CanvasSize = UDim2.new(0,0,10,0)
         TabName.ScrollBarThickness = 0
         
         UIGridLayout.Parent = TabName
