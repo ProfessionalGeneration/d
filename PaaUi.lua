@@ -2,7 +2,7 @@
 
 local t = {}
 
-function t:Library()
+function t:Library(name)
     local UI = {}
     
     local OpenKeycode = Enum.KeyCode.LeftControl
@@ -54,7 +54,7 @@ function t:Library()
     Logo.Position = UDim2.new(0.0128571428, 0, 0.0177777782, 0)
     Logo.Size = UDim2.new(0, 94, 0, 50)
     Logo.Font = Enum.Font.SourceSansBold
-    Logo.Text = "UIName"
+    Logo.Text = tostring(name)
     Logo.TextColor3 = Color3.fromRGB(255, 255, 255)
     Logo.TextScaled = true
     Logo.TextSize = 14.000
@@ -98,7 +98,7 @@ function t:Library()
         end)
 	end;
 
-	draggable(main)
+	draggable(Main)
     
     function UI:SetOpenBind(key)
         OpenKeycode = key
@@ -106,7 +106,7 @@ function t:Library()
     
     game:GetService("UserInputService").InputBegan:Connect(function(m,k)
         if not k and m.KeyCode == OpenKeycode then
-            main.Visible = not main.Visible
+            Main.Visible = not Main.Visible
         end
     end)
     
@@ -247,12 +247,13 @@ function t:Library()
         Tab1.Font = Enum.Font.SourceSansBold
         Tab1.TextColor3 = Color3.fromRGB(255, 255, 255)
         Tab1.TextScaled = true
+        Tab1.Text = tostring(Name)
         Tab1.TextSize = 14.000
         Tab1.TextStrokeTransparency = 0.500
         Tab1.TextWrapped = true
 
         UICorner.CornerRadius = UDim.new(0, 3)
-        UICorner.Parent = Tab
+        UICorner.Parent = Tab1
 
         Tab.Name = "Tab"
         Tab.Parent = TabFrames
@@ -262,6 +263,7 @@ function t:Library()
         Tab.Position = UDim2.new(0.157142863, 0, 0.0688888878, 0)
         Tab.Size = UDim2.new(0, 583, 0, 413)
         Tab.ScrollBarThickness = 5
+        Tab.CanvasSize = UDim2.new(0,0,0,300)
 
         UIGridLayout.Parent = Tab
         UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -372,6 +374,7 @@ function t:Library()
         				local vtn = min + (max - min)*r
         
         				vtn = math.round(math.clamp(vtn,min,max))
+                        Slider_2.Size = UDim2.new(r,0,0,17)
         
         				_2.Text = vtn
         
@@ -387,6 +390,7 @@ function t:Library()
         				local vtn = min + (max - min)*r
         
         				vtn = math.round(math.clamp(vtn,min,max))
+                        Slider_2.Size = UDim2.new(r,0,0,17)
         
         				_2.Text = vtn
         
@@ -405,7 +409,7 @@ function t:Library()
     
     			Number = math.round(Number)
     
-    			Slider_2.Size = UDim2.new(percent,0,0,15)
+    			Slider_2.Size = UDim2.new(percent,0,0,17)
     			f(Number)
     			_2.Text = Number
     		end
@@ -427,7 +431,6 @@ function t:Library()
             local _1 = Instance.new("TextLabel")
             local _2 = Instance.new("ImageButton")
             local DFrame = Instance.new("ScrollingFrame")
-            local Option = Instance.new("TextButton")
             local UIPadding = Instance.new("UIPadding")
             local UIGridLayout = Instance.new("UIGridLayout")
 
@@ -435,6 +438,7 @@ function t:Library()
             Dropdown.Parent = Tab
             Dropdown.BackgroundColor3 = Color3.fromRGB(0, 109, 159)
             Dropdown.Size = UDim2.new(0, 100, 0, 100)
+            Dropdown.ZIndex = 2
 
             UICorner.CornerRadius = UDim.new(0, 3)
             UICorner.Parent = Dropdown
@@ -451,6 +455,7 @@ function t:Library()
             _1.TextSize = 14.000
             _1.TextStrokeTransparency = 0.500
             _1.TextWrapped = true
+            _1.ZIndex = 3
 
             _2.Name = "2"
             _2.Parent = Dropdown
@@ -460,7 +465,7 @@ function t:Library()
             _2.Rotation = 180.000
             _2.Size = UDim2.new(0, 47, 0, 47)
             _2.Image = "rbxassetid://6545531971"
-            _2.SliceScale = 0.000
+            _2.ZIndex = 3
 
             DFrame.Name = "DFrame"
             DFrame.Parent = Dropdown
@@ -473,20 +478,6 @@ function t:Library()
             DFrame.ZIndex = 4
             DFrame.CanvasSize = UDim2.new(0, 0, 20, 0)
             DFrame.ScrollBarThickness = 0
-
-            Option.Name = "Option"
-            Option.Parent = DFrame
-            Option.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Option.BackgroundTransparency = 1.000
-            Option.BorderSizePixel = 0
-            Option.Size = UDim2.new(0, 283, 0, 24)
-            Option.ZIndex = 5
-            Option.Font = Enum.Font.SourceSansBold
-            Option.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Option.TextScaled = true
-            Option.TextSize = 14.000
-            Option.TextStrokeTransparency = 0.500
-            Option.TextWrapped = true
 
             UIPadding.Parent = DFrame
             UIPadding.PaddingBottom = UDim.new(0, 5)
@@ -506,6 +497,7 @@ function t:Library()
                 Option.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 Option.BackgroundTransparency = 1.000
                 Option.BorderSizePixel = 0
+                Option.Text = tostring(thing)
                 Option.Size = UDim2.new(0, 283, 0, 24)
                 Option.ZIndex = 5
                 Option.Font = Enum.Font.SourceSansBold
@@ -540,7 +532,7 @@ function t:Library()
     			_1.Text = tostring(name).."\n("..tostring(thing)..")"
     		end
     
-    		ImageButton.Activated:Connect(function()
+    		_2.Activated:Connect(function()
     			if not tblopen then
     			    DFrame.Visible = true
     			    game:GetService("TweenService"):Create(_2,TweenInfo.new(.2,Enum.EasingStyle.Quad),{Rotation = 180}):Play()
@@ -703,7 +695,7 @@ function t:Library()
     			f()
     		end
     
-    		Button.Activated:Connect(function()
+    		TextButton.Activated:Connect(function()
     			self2:Call()
     		end)
     
@@ -734,7 +726,7 @@ function t:Library()
             _1.Name = "1"
             _1.Parent = Toggle
             _1.BackgroundColor3 = Color3.fromRGB(0, 109, 159)
-            _1.Size = UDim2.new(0, 228, 0, 65)
+            _1.Size = UDim2.new(0, 225, 0, 65)
             _1.Font = Enum.Font.SourceSansBold
             _1.TextColor3 = Color3.fromRGB(255, 255, 255)
             _1.TextScaled = true
@@ -861,9 +853,8 @@ function t:Library()
 end
 
 return t
---[[
 
-local main = t:Library()
+--[[local main = t:Library("paa")
 
 local tab = main:Tab("misc")
 
@@ -909,6 +900,4 @@ end)
 
 main:Note("njigger","NIUGEGER",5)
 wait(1)
-main:Note("g","g",90)
-
-]]
+main:Note("g","g",90)]]
