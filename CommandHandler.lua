@@ -118,32 +118,23 @@ end
 
 function CH:HandleMessage(msg,plr)
     if plr == nil or plr == LocalPlayer or table.find(CH.GivenAdmin,plr) then
-        pcall(function()
-            local commandamount = msg:split(tostring(CH.Configuration.Split))
-            local prefix = tostring(CH.Configuration.Prefix)
-
-            if commandamount[1]:sub(1,#prefix) == prefix then
-                for i = 1,#commandamount do
-                    local firstarg
-
-                    if i == 1 then -- fix to sum funtcion dieding because prefix
-                        local prestring = commandamount[i]:split(" ")[1]
-                        firstarg = prestring:lower():sub(2,#prestring)
-                    else
-                        firstarg = commandamount[i]:split(" ")[1]:lower()
-                    end
-
-                    local args = commandamount[i]:split(" ")
-                    local found, cmdtable = CH:FindCommand(firstarg)
-                    table.remove(args,1)
-
-                    if found and plr == LocalPlayer or (cmdtable.IsUsableByOthers or false) then
-                        task.spawn(function()cmdtable["Function"](args,plr)end)
-                    end
-
+        local prefix = tostring(CH.Prefix)
+        local commandamount = msg:split(prefix)
+        
+        for i,v in pairs(commandamount) do
+            local split = v:split(" ")
+            if CH:FindCommand(split[1]:gsub(prefix,"")) then
+                local args = commandamount[i]:split(" ")
+                local found, cmdtable = CH:FindCommand(split[1]:gsub(prefix,""))
+                table.remove(args,1)
+                
+                if found and plr == LocalPlayer or (cmdtable.IsUsableByOthers or false) then
+                    task.spawn(function()
+                        cmdtable["Function"](args,plr)
+                    end)
                 end
             end
-        end)
+        end
     end
 end
 
