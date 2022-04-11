@@ -17,35 +17,160 @@ function ret:Library(Name)
 	aui.Parent = game:GetService("CoreGui")
 	aui.Name = "Athena ui Remake"
 
+	local rtbl = {}
+	local NormalColor = Color3.new(0,0,0)
+	local ErrorColor = Color3.fromRGB(38, 11, 11)
+	local NormalSound = Instance.new("Sound")
+	local ErrorSound = Instance.new("Sound")
+	local NoteSample = Instance.new("Frame")
+	local Frame = Instance.new("Frame")
+	local textName = Instance.new("TextLabel")
+	local textMessage = Instance.new("TextLabel")
+	local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+	local Notifications = Instance.new("Frame")
+
+	Notifications.Name = "Notifications"
+	Notifications.Parent = aui
+	Notifications.AnchorPoint = Vector2.new(1, 0)
+	Notifications.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Notifications.BackgroundTransparency = 1.000
+	Notifications.Position = UDim2.new(.13, 10, 1, -230)
+	Notifications.Size = UDim2.new(0, 250, 0, 100)
+	Notifications.ZIndex = 16
+
+	NoteSample.Name = "NoteSample"
+	NoteSample.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	NoteSample.BackgroundTransparency = 1.000
+	NoteSample.BorderSizePixel = 0
+	NoteSample.Position = UDim2.new(0, -180, 0, 0)
+	NoteSample.Size = UDim2.new(1, 0, 0, 40)
+	NoteSample.ZIndex = 16
+
+	Frame.Parent = NoteSample
+	Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Frame.BackgroundTransparency = 0.300
+	Frame.BorderSizePixel = 0
+	Frame.Size = UDim2.new(1, 0, 1, 0)
+	Frame.ZIndex = 16
+
+	textName.Name = "textName"
+	textName.Parent = Frame
+	textName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	textName.BackgroundTransparency = 1.000
+	textName.BorderSizePixel = 0
+	textName.Size = UDim2.new(1, 0, 0.5, 0)
+	textName.ZIndex = 16
+	textName.Font = Enum.Font.SourceSansBold
+	textName.Text = ""
+	textName.TextColor3 = Color3.fromRGB(255, 255, 255)
+	textName.TextSize = 18.000
+	textName.TextWrapped = true
+
+	textMessage.Name = "textMessage"
+	textMessage.Parent = Frame
+	textMessage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	textMessage.BackgroundTransparency = 1.000
+	textMessage.BorderSizePixel = 0
+	textMessage.Position = UDim2.new(0, 0, 0.5, 0)
+	textMessage.Size = UDim2.new(1, 0, 0.5, 0)
+	textMessage.ZIndex = 16
+	textMessage.Font = Enum.Font.SourceSansItalic
+	textMessage.Text = ""
+	textMessage.TextColor3 = Color3.fromRGB(221, 221, 221)
+	textMessage.TextScaled = true
+	textMessage.TextSize = 18.000
+	textMessage.TextWrapped = true
+	textMessage.TextYAlignment = Enum.TextYAlignment.Top
+
+	UITextSizeConstraint.Parent = textMessage
+	UITextSizeConstraint.MaxTextSize = 18
+
+	NormalSound.SoundId = "rbxassetid://2254874567"
+	NormalSound.Volume = 0.28
+	NormalSound.Parent = aui
+	ErrorSound.SoundId = "rbxassetid://2254874567"
+	ErrorSound.Volume = 0.28
+	ErrorSound.Parent = aui
+
 	draggable = function(obj)
-        spawn(function()
-            local minitial;
-            local initial;
-            local isdragging;
+        task.spawn(function()
+            local minitial
+            local initial
+            local isdragging
             obj.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    isdragging = true;
-                    minitial = input.Position;
-                    initial = obj.Position;
-                    local con;
+                    isdragging = true
+                    minitial = input.Position
+                    initial = obj.Position
+                    local con
                     con = game:GetService("RunService").Stepped:Connect(function()
                         if isdragging then
 							local mouse = game:GetService("UserInputService"):GetMouseLocation() - Vector2.new(0,game:GetService("GuiService"):GetGuiInset().Y)
-                            local delta = Vector3.new(mouse.X, mouse.Y, 0) - minitial;
+                            local delta = Vector3.new(mouse.X, mouse.Y, 0) - minitial
                             obj.Position = UDim2.new(initial.X.Scale, initial.X.Offset + delta.X, initial.Y.Scale, initial.Y.Offset + delta.Y)
                         else
-                            con:Disconnect();
-                        end;
-                    end);
+                            con:Disconnect()
+                        end
+                    end)
                     input.Changed:Connect(function()
                         if input.UserInputState == Enum.UserInputState.End then
-                            isdragging = false;
-                        end;
-                    end);
-                end;
-            end);
+                            isdragging = false
+                        end
+                    end)
+                end
+            end)
         end)
-	end;
+	end
+
+	game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+		if m.KeyCode == Enum.KeyCode.RightControl and not m2 then 
+			for i,v in pairs(aui:GetChildren()) do
+				if v.Name:find("Window") then
+					v.Visible = not v.Visible
+				end
+			end
+		end
+	end)
+
+	function ui:Note(Title,Message,Error)
+        local Note = NoteSample:Clone()
+
+        Note.Position = UDim2.new(0, 0, 0, 0)
+        Note.Frame.Position = UDim2.new(-1, 0, 0, 0)
+        rtbl[Note] = Note.Position
+        Note.Frame.textMessage.Text = tostring(Message)
+        Note.Frame.textName.Text = tostring(Title)
+
+        local T1, T2, T3 = pairs(Notifications:GetChildren())
+
+        while true do
+            local T4, T5 = T1(T2, T3)
+            if not T4 then
+                break
+            end
+            T3 = T4
+            rtbl[T5] = rtbl[T5] - UDim2.new(0, 0, 0, 42)
+            T5:TweenPosition(rtbl[T5], "Out", "Quad", 0.35, true)
+        end
+
+        if Error then
+			ErrorSound:Play()
+		else
+			NormalSound:Play()
+		end
+
+        Note.Frame.BackgroundColor3 = ((Error and ErrorColor) or (not Error and NormalColor))
+        Note.Parent = Notifications
+        Note.Frame:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Back", 0.5, true)
+
+        task.spawn(function()
+            task.wait(8)
+            Note.Frame:TweenPosition(UDim2.new(-1.1, 0, 0, 0), "Out", "Quad", 1, true)
+            task.wait(1)
+            Note:Destroy()
+            rtbl[Note] = nil
+        end)
+    end
 
 	function ui:Window(rbrbrb)
 		local self = {}
@@ -67,7 +192,7 @@ function ret:Library(Name)
 		Window1.BackgroundTransparency = 1
 		Window1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Window1.BorderSizePixel = 2
-		Window1.Position = UDim2.new(-0.09,220*m, 0.0417177901, 0)
+		Window1.Position = UDim2.new(-0.08,170*m, 0.0417177901, 0)
 		Window1.Size = UDim2.new(0, 160, 0, 274)
 		Window1.Active = false
 
@@ -94,7 +219,7 @@ function ret:Library(Name)
 		TextLabel.Text = tostring(rbrbrb)
 		TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		TextLabel.TextSize = 20.000
-		TextLabel.TextStrokeTransparency = 0.500
+		TextLabel.TextStrokeTransparency = 1
 		TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 		Min.Name = "Min"
@@ -167,10 +292,10 @@ function ret:Library(Name)
 			for i,v in pairs(Holder:GetChildren()) do
 				if v:IsA("Frame") then
 					m2 = m2 + 1
-					v.Position = UDim2.new(0,0,0,(25*m2))
+					v.Position = UDim2.new(0,0,0,(24*m2))
 				end
 			end
-			Holder.Size = UDim2.new(0,160,0,m+8)
+			Holder.Size = UDim2.new(0,160,0,m+2)
 		end
 
 		function self:Toggle(name,b,f)
@@ -511,7 +636,6 @@ function ret:Library(Name)
 			local TextLabel = Instance.new("TextLabel")
 			local UIGradient = Instance.new("UIGradient")
 			local ImageButton = Instance.new("ImageButton")
-			local Frame = Instance.new("Frame")
 			local DFrame = Instance.new("Frame")
 			local UIGradient = Instance.new("UIGradient")
 			local UIListLayout = Instance.new("UIListLayout")
@@ -553,12 +677,6 @@ function ret:Library(Name)
 			ImageButton.Rotation = 0
 			ImageButton.Size = UDim2.new(0, 16, 0, 18)
 			ImageButton.Image = "rbxassetid://6545531971"
-
-			Frame.Parent = Dropdown
-			Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Frame.BackgroundTransparency = 1.000
-			Frame.Position = UDim2.new(0, 0, 1, 0)
-			Frame.Size = UDim2.new(0, 144, 0, 100)
 
 			UIPadding.Parent = DFrame
 			UIPadding.PaddingBottom = UDim.new(0, 4)
@@ -697,14 +815,17 @@ function ret:Library(Name)
 			resize()
 		end
 
-		function self:CustomDropdown(n)
+		function self:ToggleDropdown(n,de,fu)
 			local self2 = {}
 
+			local onc = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
+			local ofc = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+			local togg = de
+
 			local Dropdown = Instance.new("Frame")
-			local TextLabel = Instance.new("TextLabel")
+			local TextLabel = Instance.new("TextButton")
 			local UIGradient = Instance.new("UIGradient")
 			local ImageButton = Instance.new("ImageButton")
-			local Frame = Instance.new("Frame")
 			local DFrame = Instance.new("Frame")
 			local UIGradient = Instance.new("UIGradient")
 			local UIListLayout = Instance.new("UIListLayout")
@@ -737,7 +858,7 @@ function ret:Library(Name)
 
 			UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
 			UIGradient.Rotation = 90
-			UIGradient.Parent = Dropdown
+			UIGradient.Parent = DFrame
 
 			ImageButton.Parent = Dropdown
 			ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -746,12 +867,6 @@ function ret:Library(Name)
 			ImageButton.Rotation = 0
 			ImageButton.Size = UDim2.new(0, 16, 0, 18)
 			ImageButton.Image = "rbxassetid://6545531971"
-
-			Frame.Parent = Dropdown
-			Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Frame.BackgroundTransparency = 1.000
-			Frame.Position = UDim2.new(0, 0, 1, 0)
-			Frame.Size = UDim2.new(0, 144, 0, 100)
 
 			UIPadding.Parent = DFrame
 			UIPadding.PaddingBottom = UDim.new(0, 4)
@@ -768,17 +883,19 @@ function ret:Library(Name)
 			DFrame.Visible = false
 			DFrame.BackgroundTransparency = .2
 
-			UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
-			UIGradient.Rotation = 90
-			UIGradient.Parent = DFrame
-
 			UIListLayout.Parent = DFrame
 			UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 			UIListLayout.Padding = UDim.new(0, 4)
 
-			UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+			UIGradient_2.Color = ((togg and onc) or (not togg and ofc))
 			UIGradient_2.Rotation = 90
 			UIGradient_2.Parent = Dropdown
+	
+			TextLabel.MouseButton1Up:Connect(function()
+				fu(not togg)
+				togg = not togg
+				UIGradient_2.Color = ((togg and onc) or (not togg and ofc))
+			end)
 
 			local function getsize()
 				local m = 4
@@ -1140,54 +1257,363 @@ function ret:Library(Name)
 			return self2
 		end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		function self:SplitFrame()
+			local self2 = {}
+			local g = 0
+
+			local SplitHolder = Instance.new("Frame")
+			local UIGradient = Instance.new("UIGradient")
+			local UIListLayout = Instance.new("UIListLayout")
+
+			SplitHolder.Name = "SplitFrame"
+			SplitHolder.Parent = Holder
+			SplitHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SplitHolder.BackgroundTransparency = 0.200
+			SplitHolder.BorderColor3 = Color3.fromRGB(23, 25, 52)
+			SplitHolder.Size = UDim2.new(0, 153, 0, 20)
+			SplitHolder.BackgroundTransparency = 1
+
+			UIListLayout.Parent = SplitHolder
+			UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+			UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder	
+
+			function self2:Toggle(name,b,f)
+				g = g + 1
+				if g <= 2 then
+					local onc = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
+					local ofc = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+					local tog = b
+					
+					local Toggle = Instance.new("Frame")
+					local TextButton = Instance.new("TextButton")
+					local UIGradient = Instance.new("UIGradient")
+		
+					Toggle.Name = "Toggle"
+					Toggle.Parent = SplitHolder
+					Toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Toggle.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Toggle.Size = UDim2.new(0, 154/2, 0, 20)
+					Toggle.BackgroundTransparency = .2
+		
+					TextButton.Parent = Toggle
+					TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.BackgroundTransparency = 1.000
+					TextButton.BorderSizePixel = 3
+					TextButton.Position = UDim2.new(0.026041666, 0, 0, 0)
+					TextButton.Size = UDim2.new(0, 148/2, 0, 20)
+					TextButton.Font = Enum.Font.SourceSansBold
+					TextButton.Text = tostring(name)
+					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.TextSize = 17.000
+					TextButton.TextStrokeTransparency = 1
+					TextButton.TextXAlignment = Enum.TextXAlignment.Left
+		
+					UIGradient.Color = ((tog and onc) or (not tog and ofc))
+					UIGradient.Rotation = 90
+					UIGradient.Parent = Toggle
+		
+					TextButton.MouseButton1Up:Connect(function()
+						f(not tog)
+						tog = not tog
+						UIGradient.Color = ((tog and onc) or (not tog and ofc))
+					end)
+				end
+			end
+	
+			function self2:Button(n,f)
+				g = g + 1
+				if g <= 2 then
+					local Button = Instance.new("Frame")
+					local TextButton = Instance.new("TextButton")
+					local UIGradient = Instance.new("UIGradient")
+		
+					Button.Name = "Button"
+					Button.Parent = SplitHolder
+					Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Button.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Button.Size = UDim2.new(0, 154/2, 0, 20)
+					Button.BackgroundTransparency = .2
+		
+					TextButton.Parent = Button
+					TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.BackgroundTransparency = 1.000
+					TextButton.BorderSizePixel = 3
+					TextButton.Position = UDim2.new(0, 0, 0, 0)
+					TextButton.Size = UDim2.new(0, 148/2, 0, 20)
+					TextButton.Font = Enum.Font.SourceSansBold
+					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.Text = tostring(n)
+					TextButton.TextSize = 17.000
+					TextButton.TextStrokeTransparency = 1
+					TextButton.TextXAlignment = Enum.TextXAlignment.Left
+		
+					UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+					UIGradient.Rotation = 90
+					UIGradient.Parent = Button
+
+					TextButton.MouseButton1Up:Connect(f)
+				end
+			end
+	
+			function self2:Keybind(n,d,f)
+				g = g + 1
+				if g <= 2 then
+					local k = d
+		
+					local Keybind = Instance.new("Frame")
+					local TextButton = Instance.new("TextButton")
+					local UIGradient = Instance.new("UIGradient")
+		
+					Keybind.Name = "Keybind"
+					Keybind.Parent = SplitHolder
+					Keybind.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Keybind.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Keybind.Size = UDim2.new(0, 154/2, 0, 20)
+					Keybind.BackgroundTransparency = .2
+		
+					TextButton.Parent = Keybind
+					TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.BackgroundTransparency = 1.000
+					TextButton.BorderSizePixel = 3
+					TextButton.Position = UDim2.new(0, 0, 0, 0)
+					TextButton.Size = UDim2.new(0, 148/2, 0, 20)
+					TextButton.Font = Enum.Font.SourceSansBold
+					TextButton.Text = tostring(n).." : "..tostring(d):sub(14):lower()
+					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+					TextButton.TextSize = 17.000
+					TextButton.TextStrokeTransparency = 1
+		
+					UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+					UIGradient.Rotation = 90
+					UIGradient.Parent = Keybind
+		
+					game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+						if not m2 then
+							if not selecting then
+								if m.KeyCode == k then
+									f(k)
+								end
+							end
+						end
+					end)
+		
+					TextButton.MouseButton1Up:Connect(function()
+						TextButton.Text = tostring(n).." : ..."
+						selecting = true
+						local con; con = game:GetService("UserInputService").InputBegan:Connect(function(m)
+							if m.KeyCode ~= Enum.KeyCode.Unknown then
+								k = m.KeyCode
+								TextButton.Text = tostring(n).." : "..tostring(k):sub(14):lower()
+								selecting = false
+								con:Disconnect()
+							end
+						end)
+					end)
+				end
+			end
+	
+			function self2:Slider(n,min,max,default,f)
+				g = g + 1
+				if g <= 2 then
+					local Slider = Instance.new("Frame")
+					local SliderFrame = Instance.new("TextButton")
+					local UIGradient = Instance.new("UIGradient")
+					local Slider_2 = Instance.new("TextButton")
+					local OnToggleGradient = Instance.new("UIGradient")
+		
+					Slider.Name = "Slider"
+					Slider.Parent = SplitHolder
+					Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Slider.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Slider.Position = UDim2.new(0, 0, 0, 0)
+					Slider.Size = UDim2.new(0, 154/2, 0, 20)
+					Slider.BackgroundTransparency = .2
+		
+					SliderFrame.Parent = Slider
+					SliderFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					SliderFrame.BackgroundTransparency = 1.000
+					SliderFrame.BorderSizePixel = 3
+					SliderFrame.Position = UDim2.new(0, 0, 0, 0)
+					SliderFrame.Size = UDim2.new(0, 148/2, 0, 20)
+					SliderFrame.Font = Enum.Font.SourceSansBold
+					SliderFrame.Text = tostring(n)..": "..tostring(default)
+					SliderFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
+					SliderFrame.TextSize = 17.000
+					SliderFrame.TextStrokeTransparency = 1
+					SliderFrame.ZIndex = 2
+		
+					UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+					UIGradient.Rotation = 90
+					UIGradient.Parent = Slider
+		
+					Slider_2.Name = "Slider"
+					Slider_2.Parent = Slider
+					Slider_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Slider_2.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Slider_2.BorderSizePixel = 1
+					Slider_2.Position = UDim2.new(0, 0, 0, 1)
+					Slider_2.Size = UDim2.new(0, 12, 0, 18)
+					Slider_2.Font = Enum.Font.SourceSans
+					Slider_2.Text = ""
+					Slider_2.TextColor3 = Color3.fromRGB(0, 0, 0)
+					Slider_2.TextSize = 14.000
+					Slider_2.BackgroundTransparency = .2
+		
+					OnToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
+					OnToggleGradient.Rotation = 90
+					OnToggleGradient.Name = "OnToggleGradient"
+					OnToggleGradient.Parent = Slider_2
+		
+					game:GetService("UserInputService").InputEnded:Connect(function(m)
+						if m.UserInputType == Enum.UserInputType.MouseButton1 then
+							if con then
+								con:Disconnect()
+								con = nil
+							end
+						end
+					end)
+			
+					local function move()
+						if not con then
+							con = game:GetService("RunService").Stepped:Connect(function()
+								local m = game:GetService("UserInputService"):GetMouseLocation()
+								local r = math.clamp(((m.X-Slider_2.AbsoluteSize.X) - SliderFrame.AbsolutePosition.X)/(SliderFrame.AbsoluteSize.X),0,1)
+								local vtn = min + (max - min)*r
+				
+								vtn = math.round(math.clamp(vtn,min,max))
+								Slider_2.Position = UDim2.new(r*.92, 0, 0, 1)
+				
+								SliderFrame.Text = tostring(n)..": "..tostring(vtn)
+				
+								f(vtn)
+							end)
+						end
+					end
+					
+					SliderFrame.MouseButton1Down:Connect(move)
+					Slider_2.MouseButton1Down:Connect(move)
+				end
+			end
+	
+			function self2:TextBox(n,find,f)
+				g = g + 1
+				if g <= 2 then
+					local Textbox = Instance.new("Frame")
+					local UIGradient = Instance.new("UIGradient")
+					local TextBox = Instance.new("TextBox")
+					local TextLabel = Instance.new("TextLabel")
+		
+					Textbox.Name = "Textbox"
+					Textbox.Parent = SplitHolder
+					Textbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Textbox.BorderColor3 = Color3.fromRGB(23, 25, 52)
+					Textbox.Position = UDim2.new(0, 0, 0, 0)
+					Textbox.Size = UDim2.new(0, 154/2, 0, 20)
+					Textbox.BackgroundTransparency = .2
+		
+					UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
+					UIGradient.Rotation = 90
+					UIGradient.Parent = Textbox
+		
+					TextBox.Parent = Textbox
+					TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TextBox.BackgroundTransparency = 1.000
+					TextBox.Position = UDim2.new(0.0267857146, 0, 0, 0)
+					TextBox.Size = UDim2.new(0, 148/2, 0, 20)
+					TextBox.ZIndex = 2
+					TextBox.PlaceholderText = tostring(n)
+					TextBox.Font = Enum.Font.SourceSansBold
+					TextBox.Text = ""
+					TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+					TextBox.TextSize = 17.000
+					TextBox.TextStrokeTransparency = 1
+					TextBox.TextXAlignment = Enum.TextXAlignment.Left
+		
+					TextLabel.Name = "TextLabel"
+					TextLabel.Parent = Textbox
+					TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TextLabel.BackgroundTransparency = 1.000
+					TextLabel.Position = UDim2.new(0.0267857146, 0, 0, 0)
+					TextLabel.Size = UDim2.new(0, 148/2, 0, 20)
+					TextLabel.Font = Enum.Font.SourceSansBold
+					TextLabel.Text = ""
+					TextLabel.TextColor3 = Color3.fromRGB(179, 179, 179)
+					TextLabel.TextSize = 17.000
+					TextLabel.TextStrokeTransparency = 1
+					TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+					local fs = ""
+		
+					TextBox.Changed:Connect(function(t)
+						if t == "Text" and find ~= nil then
+							local text = TextBox.Text
+							if typeof(find) == "string" and find:lower() == "players" and TextBox.Text ~= "" then
+								for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+									if v.Name:lower():find(text:lower()) then
+										TextLabel.Text = TextBox.Text..v.Name:sub(#TextBox.Text+1)
+										fs = v.Name
+										break
+									end
+									
+									if v.DisplayName:lower():find(text:lower()) then
+										TextLabel.Text = TextBox.Text..v.DisplayName:sub(#TextBox.Text+1)
+										fs = v.DisplayName
+										break
+									end
+								end
+							end
+		
+							if typeof(find) == "table" and TextBox.Text ~= "" then
+								for i,v in pairs(find) do
+									if tostring(v):lower():find(text:lower()) then
+										TextLabel.Text = TextBox.Text..tostring(v):sub(#TextBox.Text+1)
+										fs = tostring(v)
+										break
+									end
+								end
+							end
+						end
+					end)
+		
+					TextBox.FocusLost:Connect(function()
+						if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.RightShift) or game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+							f(TextLabel.Text)
+							TextBox.Text = fs
+							TextLabel.Text = ""
+						else
+							f(TextBox.Text)
+							TextLabel.Text = ""
+						end
+					end)
+				end
+			end
+			resize()
+			return self2
+		end
+		resize()
 		return self
 	end
 	return ui
 end
 
 return ret
-
---[[
-local g2 = ret:Library()
-
-local g = g2:Window("Player")
-
-g:Label("Athena Ui")
-
-g:Toggle("Toggle",
-true, -- default
-print)
-
-g:Keybind("Keybind",
-Enum.KeyCode.H, -- default
-print)
-
-g:Dropdown("Dropdown",
-{"cajun epic",'great ui lib',"i miss athena"},
-print)
-
-g:Button("hi",
-print)
-
-g:TextBox("Textbox",
-"Players", -- Text behind. for ex. if you type part of a players name it will show their full name behind (works with display names as well). you can put a custom table here as well.
-print)
-
-g:Slider("Slider", -- slider may drag behind ur cursor but whatever
-1, --min
-10, --max
-5, --default
-print)
-
-local cd = g:CustomDropdown("Custom Dropdown") -- has same things as a window expect no dropdowns or labels
-
-cd:Toggle("Toggle",true,print)
-
-cd:Keybind("Keybind",Enum.KeyCode.H,print)
-
-cd:Button("hi",print)
-
-cd:TextBox("Textbox","Players",print)
-
-cd:Slider("Slider",1,750000,5,print)
-]]
