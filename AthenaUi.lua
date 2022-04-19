@@ -2,6 +2,8 @@
 	i dont think they exist anymore idk
 	made just for memories
 ]]
+local uis = game:GetService("UserInputService")
+local run = game:GetService("RunService")
 
 if game:GetService("CoreGui"):FindFirstChild("Athena ui Remake") then
 	game:GetService("CoreGui"):FindFirstChild("Athena ui Remake"):Destroy()
@@ -103,9 +105,9 @@ function ret:Library(Name)
                     minitial = input.Position
                     initial = obj.Position
                     local con
-                    con = game:GetService("RunService").Stepped:Connect(function()
+                    con = run.Stepped:Connect(function()
                         if isdragging then
-							local mouse = game:GetService("UserInputService"):GetMouseLocation() - Vector2.new(0,game:GetService("GuiService"):GetGuiInset().Y)
+							local mouse = uis:GetMouseLocation() - Vector2.new(0,game:GetService("GuiService"):GetGuiInset().Y)
                             local delta = Vector3.new(mouse.X, mouse.Y, 0) - minitial
                             obj.Position = UDim2.new(initial.X.Scale, initial.X.Offset + delta.X, initial.Y.Scale, initial.Y.Offset + delta.Y)
                         else
@@ -122,7 +124,7 @@ function ret:Library(Name)
         end)
 	end
 
-	game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+	uis.InputBegan:Connect(function(m,m2)
 		if m.KeyCode == Enum.KeyCode.RightControl and not m2 then 
 			for i,v in pairs(aui:GetChildren()) do
 				if v.Name:find("Window") then
@@ -267,13 +269,13 @@ function ret:Library(Name)
 		UIPadding.PaddingRight = UDim.new(0, 3)
 		UIPadding.PaddingTop = UDim.new(0, 3)
 
-		Min.MouseButton1Up:Connect(function()
+		Min.MouseButton1Down:Connect(function()
 			Holder.Visible = false
 			Max.Text = "+"
 			Min.Text = ""
 		end)
 
-		Max.MouseButton1Up:Connect(function()
+		Max.MouseButton1Down:Connect(function()
 			Holder.Visible = true
 			Max.Text = ""
 			Min.Text = "-"
@@ -323,7 +325,7 @@ function ret:Library(Name)
 			TextButton.Font = Enum.Font.SourceSansBold
 			TextButton.Text = tostring(name)
 			TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextButton.TextSize = 17.000
+			TextButton.TextSize = 15.000
 			TextButton.TextStrokeTransparency = 1
 			TextButton.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -331,7 +333,7 @@ function ret:Library(Name)
 			UIGradient.Rotation = 90
 			UIGradient.Parent = Toggle
 
-			TextButton.MouseButton1Up:Connect(function()
+			TextButton.MouseButton1Down:Connect(function()
 				f(not tog)
 				tog = not tog
 				UIGradient.Color = ((tog and onc) or (not tog and ofc))
@@ -360,7 +362,7 @@ function ret:Library(Name)
 			TextButton.Font = Enum.Font.SourceSansBold
 			TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 			TextButton.Text = tostring(n)
-			TextButton.TextSize = 17.000
+			TextButton.TextSize = 15.000
 			TextButton.TextStrokeTransparency = 1
 			TextButton.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -368,7 +370,7 @@ function ret:Library(Name)
 			UIGradient.Rotation = 90
 			UIGradient.Parent = Button
 
-			TextButton.MouseButton1Up:Connect(f)
+			TextButton.MouseButton1Down:Connect(f)
 			resize()
 		end
 
@@ -395,14 +397,14 @@ function ret:Library(Name)
 			TextButton.Font = Enum.Font.SourceSansBold
 			TextButton.Text = tostring(n).." : "..tostring(d):sub(14):lower()
 			TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextButton.TextSize = 17.000
+			TextButton.TextSize = 15.000
 			TextButton.TextStrokeTransparency = 1
 
 			UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
 			UIGradient.Rotation = 90
 			UIGradient.Parent = Keybind
 
-			game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+			uis.InputBegan:Connect(function(m,m2)
 				if not m2 then
 					if not selecting then
 						if m.KeyCode == k then
@@ -412,10 +414,10 @@ function ret:Library(Name)
 				end
 			end)
 
-			TextButton.MouseButton1Up:Connect(function()
+			TextButton.MouseButton1Down:Connect(function()
 				TextButton.Text = tostring(n).." : ..."
 				selecting = true
-				local con; con = game:GetService("UserInputService").InputBegan:Connect(function(m)
+				local con; con = uis.InputBegan:Connect(function(m)
 					if m.KeyCode ~= Enum.KeyCode.Unknown then
 						k = m.KeyCode
 						TextButton.Text = tostring(n).." : "..tostring(k):sub(14):lower()
@@ -450,7 +452,7 @@ function ret:Library(Name)
 			TextLabel.Font = Enum.Font.SourceSansBold
 			TextLabel.Text = tostring(text)
 			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextLabel.TextSize = 17.000
+			TextLabel.TextSize = 15.000
 			TextLabel.TextStrokeTransparency = 1
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -460,7 +462,7 @@ function ret:Library(Name)
 			resize()
 		end
 
-		function self:Slider(n,min,max,default,f)
+		function self:Slider(n,min,max,default,precise,f)
 			local Slider = Instance.new("Frame")
 			local SliderFrame = Instance.new("TextButton")
 			local UIGradient = Instance.new("UIGradient")
@@ -484,7 +486,7 @@ function ret:Library(Name)
 			SliderFrame.Font = Enum.Font.SourceSansBold
 			SliderFrame.Text = tostring(n)..": "..tostring(default)
 			SliderFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
-			SliderFrame.TextSize = 17.000
+			SliderFrame.TextSize = 15.000
 			SliderFrame.TextStrokeTransparency = 1
 			SliderFrame.ZIndex = 2
 
@@ -502,7 +504,7 @@ function ret:Library(Name)
 			Slider_2.Font = Enum.Font.SourceSans
 			Slider_2.Text = ""
 			Slider_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-			Slider_2.TextSize = 14.000
+			Slider_2.TextSize = 15.000
 			Slider_2.BackgroundTransparency = .2
 
 			OnToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
@@ -510,7 +512,7 @@ function ret:Library(Name)
 			OnToggleGradient.Name = "OnToggleGradient"
 			OnToggleGradient.Parent = Slider_2
 
-			game:GetService("UserInputService").InputEnded:Connect(function(m)
+			uis.InputEnded:Connect(function(m)
     			if m.UserInputType == Enum.UserInputType.MouseButton1 then
     				if con then
     					con:Disconnect()
@@ -521,17 +523,22 @@ function ret:Library(Name)
     
             local function move()
                 if not con then
-        			con = game:GetService("RunService").Stepped:Connect(function()
-        				local m = game:GetService("UserInputService"):GetMouseLocation()
+        			con = run.Stepped:Connect(function()
+        				local m = uis:GetMouseLocation()
         				local r = math.clamp(((m.X-Slider_2.AbsoluteSize.X) - SliderFrame.AbsolutePosition.X)/(SliderFrame.AbsoluteSize.X),0,1)
         				local vtn = min + (max - min)*r
         
-        				vtn = math.round(math.clamp(vtn,min,max))
+        				vtn = math.clamp(vtn,min,max)
                         Slider_2.Position = UDim2.new(r*.92, 0, 0, 1)
         
-        				SliderFrame.Text = tostring(n)..": "..tostring(vtn)
-        
-        				f(vtn)
+        				if not precise then
+							vtn = math.round(vtn)
+						else
+							vtn = tonumber(tostring(vtn):sub(1,4))
+						end
+
+						SliderFrame.Text = tostring(n)..": "..tostring(vtn)
+						f(vtn)
         			end)
                 end
             end
@@ -569,7 +576,7 @@ function ret:Library(Name)
 			TextBox.Font = Enum.Font.SourceSansBold
 			TextBox.Text = ""
 			TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextBox.TextSize = 17.000
+			TextBox.TextSize = 15.000
 			TextBox.TextStrokeTransparency = 1
 			TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -582,7 +589,7 @@ function ret:Library(Name)
 			TextLabel.Font = Enum.Font.SourceSansBold
 			TextLabel.Text = ""
 			TextLabel.TextColor3 = Color3.fromRGB(179, 179, 179)
-			TextLabel.TextSize = 17.000
+			TextLabel.TextSize = 15.000
 			TextLabel.TextStrokeTransparency = 1
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 			local fs = ""
@@ -619,7 +626,7 @@ function ret:Library(Name)
 			end)
 
 			TextBox.FocusLost:Connect(function()
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.RightShift) or game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+				if uis:IsKeyDown(Enum.KeyCode.RightShift) or uis:IsKeyDown(Enum.KeyCode.LeftShift) then
 					f(TextLabel.Text)
 					TextBox.Text = fs
 					TextLabel.Text = ""
@@ -662,7 +669,7 @@ function ret:Library(Name)
 			TextLabel.Font = Enum.Font.SourceSansBold
 			TextLabel.Text = tostring(n)
 			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextLabel.TextSize = 17.000
+			TextLabel.TextSize = 15.000
 			TextLabel.TextStrokeTransparency = 1
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -775,7 +782,7 @@ function ret:Library(Name)
 				Option.Text = tostring(thing)
 				Option.Font = Enum.Font.SourceSansBold
 				Option.TextColor3 = Color3.fromRGB(255, 255, 255)
-				Option.TextSize = 17.000
+				Option.TextSize = 15.000
 				Option.TextStrokeTransparency = 1
 				Option.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -783,7 +790,7 @@ function ret:Library(Name)
 				UIGradient_2.Rotation = 90
 				UIGradient_2.Parent = OptionParent
 
-				Option.MouseButton1Up:Connect(function()
+				Option.MouseButton1Down:Connect(function()
 					UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
 					task.wait(.5)
 					up()
@@ -795,7 +802,7 @@ function ret:Library(Name)
 				end)
 			end
 
-			ImageButton.MouseButton1Up:Connect(function()
+			ImageButton.MouseButton1Down:Connect(function()
 				DFrame.Size = UDim2.new(0,154,0,getsize())
 				ImageButton.Rotation = ((not openg and 180) or (openg and 0))
 				openg = not openg
@@ -852,7 +859,7 @@ function ret:Library(Name)
 			TextLabel.Font = Enum.Font.SourceSansBold
 			TextLabel.Text = tostring(n)
 			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TextLabel.TextSize = 17.000
+			TextLabel.TextSize = 15.000
 			TextLabel.TextStrokeTransparency = 1
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -891,7 +898,7 @@ function ret:Library(Name)
 			UIGradient_2.Rotation = 90
 			UIGradient_2.Parent = Dropdown
 	
-			TextLabel.MouseButton1Up:Connect(function()
+			TextLabel.MouseButton1Down:Connect(function()
 				fu(not togg)
 				togg = not togg
 				UIGradient_2.Color = ((togg and onc) or (not togg and ofc))
@@ -970,7 +977,7 @@ function ret:Library(Name)
 				TextButton.Font = Enum.Font.SourceSansBold
 				TextButton.Text = tostring(name)
 				TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextButton.TextSize = 17.000
+				TextButton.TextSize = 15.000
 				TextButton.TextStrokeTransparency = 1
 				TextButton.TextXAlignment = Enum.TextXAlignment.Left
 	
@@ -978,7 +985,7 @@ function ret:Library(Name)
 				UIGradient.Rotation = 90
 				UIGradient.Parent = Toggle
 	
-				TextButton.MouseButton1Up:Connect(function()
+				TextButton.MouseButton1Down:Connect(function()
 					f(not tog)
 					tog = not tog
 					UIGradient.Color = ((tog and onc) or (not tog and ofc))
@@ -1006,7 +1013,7 @@ function ret:Library(Name)
 				TextButton.Font = Enum.Font.SourceSansBold
 				TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 				TextButton.Text = tostring(n)
-				TextButton.TextSize = 17.000
+				TextButton.TextSize = 15.000
 				TextButton.TextStrokeTransparency = 1
 				TextButton.TextXAlignment = Enum.TextXAlignment.Left
 	
@@ -1014,7 +1021,7 @@ function ret:Library(Name)
 				UIGradient.Rotation = 90
 				UIGradient.Parent = Button
 	
-				TextButton.MouseButton1Up:Connect(f)
+				TextButton.MouseButton1Down:Connect(f)
 			end
 	
 			function self2:Keybind(n,d,f)
@@ -1040,14 +1047,14 @@ function ret:Library(Name)
 				TextButton.Font = Enum.Font.SourceSansBold
 				TextButton.Text = tostring(n).." : "..tostring(d):sub(14):lower()
 				TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextButton.TextSize = 17.000
+				TextButton.TextSize = 15.000
 				TextButton.TextStrokeTransparency = 1
 	
 				UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
 				UIGradient.Rotation = 90
 				UIGradient.Parent = Keybind
 	
-				game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+				uis.InputBegan:Connect(function(m,m2)
 					if not m2 then
 						if not selecting then
 							if m.KeyCode == k then
@@ -1057,10 +1064,10 @@ function ret:Library(Name)
 					end
 				end)
 	
-				TextButton.MouseButton1Up:Connect(function()
+				TextButton.MouseButton1Down:Connect(function()
 					TextButton.Text = tostring(n).." : ..."
 					selecting = true
-					local con; con = game:GetService("UserInputService").InputBegan:Connect(function(m)
+					local con; con = uis.InputBegan:Connect(function(m)
 						if m.KeyCode ~= Enum.KeyCode.Unknown then
 							k = m.KeyCode
 							TextButton.Text = tostring(n).." : "..tostring(k):sub(14):lower()
@@ -1071,7 +1078,7 @@ function ret:Library(Name)
 				end)
 			end
 	
-			function self2:Slider(n,min,max,default,f)
+			function self2:Slider(n,min,max,default,precise,f)
 				local Slider = Instance.new("Frame")
 				local SliderFrame = Instance.new("TextButton")
 				local UIGradient = Instance.new("UIGradient")
@@ -1095,7 +1102,7 @@ function ret:Library(Name)
 				SliderFrame.Font = Enum.Font.SourceSansBold
 				SliderFrame.Text = tostring(n)..": "..tostring(default)
 				SliderFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
-				SliderFrame.TextSize = 17.000
+				SliderFrame.TextSize = 15.000
 				SliderFrame.TextStrokeTransparency = 1
 				SliderFrame.ZIndex = 2
 	
@@ -1113,7 +1120,7 @@ function ret:Library(Name)
 				Slider_2.Font = Enum.Font.SourceSans
 				Slider_2.Text = ""
 				Slider_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-				Slider_2.TextSize = 14.000
+				Slider_2.TextSize = 15.000
 				Slider_2.BackgroundTransparency = .2
 	
 				OnToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
@@ -1121,7 +1128,7 @@ function ret:Library(Name)
 				OnToggleGradient.Name = "OnToggleGradient"
 				OnToggleGradient.Parent = Slider_2
 	
-				game:GetService("UserInputService").InputEnded:Connect(function(m)
+				uis.InputEnded:Connect(function(m)
 					if m.UserInputType == Enum.UserInputType.MouseButton1 then
 						if con then
 							con:Disconnect()
@@ -1132,16 +1139,21 @@ function ret:Library(Name)
 		
 				local function move()
 					if not con then
-						con = game:GetService("RunService").Stepped:Connect(function()
-							local m = game:GetService("UserInputService"):GetMouseLocation()
+						con = run.Stepped:Connect(function()
+							local m = uis:GetMouseLocation()
 							local r = math.clamp(((m.X-Slider_2.AbsoluteSize.X) - SliderFrame.AbsolutePosition.X)/(SliderFrame.AbsoluteSize.X),0,1)
 							local vtn = min + (max - min)*r
 			
-							vtn = math.round(math.clamp(vtn,min,max))
+							vtn = math.clamp(vtn,min,max)
 							Slider_2.Position = UDim2.new(r*.92, 0, 0, 1)
 			
+							if not precise then
+								vtn = math.round(vtn)
+							else
+								vtn = tonumber(tostring(vtn):sub(1,4))
+							end
+
 							SliderFrame.Text = tostring(n)..": "..tostring(vtn)
-			
 							f(vtn)
 						end)
 					end
@@ -1179,7 +1191,7 @@ function ret:Library(Name)
 				TextBox.Font = Enum.Font.SourceSansBold
 				TextBox.Text = ""
 				TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextBox.TextSize = 17.000
+				TextBox.TextSize = 15.000
 				TextBox.TextStrokeTransparency = 1
 				TextBox.TextXAlignment = Enum.TextXAlignment.Left
 	
@@ -1192,7 +1204,7 @@ function ret:Library(Name)
 				TextLabel.Font = Enum.Font.SourceSansBold
 				TextLabel.Text = ""
 				TextLabel.TextColor3 = Color3.fromRGB(179, 179, 179)
-				TextLabel.TextSize = 17.000
+				TextLabel.TextSize = 15.000
 				TextLabel.TextStrokeTransparency = 1
 				TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 				local fs = ""
@@ -1229,7 +1241,7 @@ function ret:Library(Name)
 				end)
 	
 				TextBox.FocusLost:Connect(function()
-					if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.RightShift) or game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+					if uis:IsKeyDown(Enum.KeyCode.RightShift) or uis:IsKeyDown(Enum.KeyCode.LeftShift) then
 						f(TextLabel.Text)
 						TextBox.Text = fs
 						TextLabel.Text = ""
@@ -1240,7 +1252,7 @@ function ret:Library(Name)
 				end)
 			end
 
-			ImageButton.MouseButton1Up:Connect(function()
+			ImageButton.MouseButton1Down:Connect(function()
 				DFrame.Size = UDim2.new(0,154,0,getsize())
 				ImageButton.Rotation = ((not openg and 180) or (openg and 0))
 				openg = not openg
@@ -1325,7 +1337,7 @@ function ret:Library(Name)
 					TextButton.Font = Enum.Font.SourceSansBold
 					TextButton.Text = tostring(name)
 					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-					TextButton.TextSize = 17.000
+					TextButton.TextSize = 15.000
 					TextButton.TextStrokeTransparency = 1
 					TextButton.TextXAlignment = Enum.TextXAlignment.Left
 		
@@ -1333,7 +1345,7 @@ function ret:Library(Name)
 					UIGradient.Rotation = 90
 					UIGradient.Parent = Toggle
 		
-					TextButton.MouseButton1Up:Connect(function()
+					TextButton.MouseButton1Down:Connect(function()
 						f(not tog)
 						tog = not tog
 						UIGradient.Color = ((tog and onc) or (not tog and ofc))
@@ -1364,7 +1376,7 @@ function ret:Library(Name)
 					TextButton.Font = Enum.Font.SourceSansBold
 					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 					TextButton.Text = tostring(n)
-					TextButton.TextSize = 17.000
+					TextButton.TextSize = 15.000
 					TextButton.TextStrokeTransparency = 1
 					TextButton.TextXAlignment = Enum.TextXAlignment.Left
 		
@@ -1372,7 +1384,7 @@ function ret:Library(Name)
 					UIGradient.Rotation = 90
 					UIGradient.Parent = Button
 
-					TextButton.MouseButton1Up:Connect(f)
+					TextButton.MouseButton1Down:Connect(f)
 				end
 			end
 	
@@ -1401,14 +1413,14 @@ function ret:Library(Name)
 					TextButton.Font = Enum.Font.SourceSansBold
 					TextButton.Text = tostring(n).." : "..tostring(d):sub(14):lower()
 					TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-					TextButton.TextSize = 17.000
+					TextButton.TextSize = 15.000
 					TextButton.TextStrokeTransparency = 1
 		
 					UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(86, 87, 85)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(78, 77, 73))}
 					UIGradient.Rotation = 90
 					UIGradient.Parent = Keybind
 		
-					game:GetService("UserInputService").InputBegan:Connect(function(m,m2)
+					uis.InputBegan:Connect(function(m,m2)
 						if not m2 then
 							if not selecting then
 								if m.KeyCode == k then
@@ -1418,10 +1430,10 @@ function ret:Library(Name)
 						end
 					end)
 		
-					TextButton.MouseButton1Up:Connect(function()
+					TextButton.MouseButton1Down:Connect(function()
 						TextButton.Text = tostring(n).." : ..."
 						selecting = true
-						local con; con = game:GetService("UserInputService").InputBegan:Connect(function(m)
+						local con; con = uis.InputBegan:Connect(function(m)
 							if m.KeyCode ~= Enum.KeyCode.Unknown then
 								k = m.KeyCode
 								TextButton.Text = tostring(n).." : "..tostring(k):sub(14):lower()
@@ -1433,7 +1445,7 @@ function ret:Library(Name)
 				end
 			end
 	
-			function self2:Slider(n,min,max,default,f)
+			function self2:Slider(n,min,max,default,precise,f)
 				g = g + 1
 				if g <= 2 then
 					local Slider = Instance.new("Frame")
@@ -1459,7 +1471,7 @@ function ret:Library(Name)
 					SliderFrame.Font = Enum.Font.SourceSansBold
 					SliderFrame.Text = tostring(n)..": "..tostring(default)
 					SliderFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
-					SliderFrame.TextSize = 17.000
+					SliderFrame.TextSize = 15.000
 					SliderFrame.TextStrokeTransparency = 1
 					SliderFrame.ZIndex = 2
 		
@@ -1477,7 +1489,7 @@ function ret:Library(Name)
 					Slider_2.Font = Enum.Font.SourceSans
 					Slider_2.Text = ""
 					Slider_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-					Slider_2.TextSize = 14.000
+					Slider_2.TextSize = 15.000
 					Slider_2.BackgroundTransparency = .2
 		
 					OnToggleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(46, 59, 145)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(39, 49, 126))}
@@ -1485,7 +1497,7 @@ function ret:Library(Name)
 					OnToggleGradient.Name = "OnToggleGradient"
 					OnToggleGradient.Parent = Slider_2
 		
-					game:GetService("UserInputService").InputEnded:Connect(function(m)
+					uis.InputEnded:Connect(function(m)
 						if m.UserInputType == Enum.UserInputType.MouseButton1 then
 							if con then
 								con:Disconnect()
@@ -1496,16 +1508,21 @@ function ret:Library(Name)
 			
 					local function move()
 						if not con then
-							con = game:GetService("RunService").Stepped:Connect(function()
-								local m = game:GetService("UserInputService"):GetMouseLocation()
+							con = run.Stepped:Connect(function()
+								local m = uis:GetMouseLocation()
 								local r = math.clamp(((m.X-Slider_2.AbsoluteSize.X) - SliderFrame.AbsolutePosition.X)/(SliderFrame.AbsoluteSize.X),0,1)
 								local vtn = min + (max - min)*r
 				
-								vtn = math.round(math.clamp(vtn,min,max))
+								vtn = math.clamp(vtn,min,max)
 								Slider_2.Position = UDim2.new(r*.92, 0, 0, 1)
 				
+								if not precise then
+									vtn = math.round(vtn)
+								else
+									vtn = tonumber(tostring(vtn):sub(1,4))
+								end
+	
 								SliderFrame.Text = tostring(n)..": "..tostring(vtn)
-				
 								f(vtn)
 							end)
 						end
@@ -1546,7 +1563,7 @@ function ret:Library(Name)
 					TextBox.Font = Enum.Font.SourceSansBold
 					TextBox.Text = ""
 					TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-					TextBox.TextSize = 17.000
+					TextBox.TextSize = 15.000
 					TextBox.TextStrokeTransparency = 1
 					TextBox.TextXAlignment = Enum.TextXAlignment.Left
 		
@@ -1559,7 +1576,7 @@ function ret:Library(Name)
 					TextLabel.Font = Enum.Font.SourceSansBold
 					TextLabel.Text = ""
 					TextLabel.TextColor3 = Color3.fromRGB(179, 179, 179)
-					TextLabel.TextSize = 17.000
+					TextLabel.TextSize = 15.000
 					TextLabel.TextStrokeTransparency = 1
 					TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 					local fs = ""
@@ -1596,7 +1613,7 @@ function ret:Library(Name)
 					end)
 		
 					TextBox.FocusLost:Connect(function()
-						if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.RightShift) or game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+						if uis:IsKeyDown(Enum.KeyCode.RightShift) or uis:IsKeyDown(Enum.KeyCode.LeftShift) then
 							f(TextLabel.Text)
 							TextBox.Text = fs
 							TextLabel.Text = ""
