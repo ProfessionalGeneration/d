@@ -1,4 +1,3 @@
-
 local ret = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/GFXTI/d/main/AthenaUi.lua"))()
 local togs = {
     SilentAim = {
@@ -756,7 +755,7 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 
 	if togs.EntitySpeed.Toggled then
 		if v == "Velocity" then
-            if i.Name == "FlightVelocity" then
+            if i.Name == "AssemblyLinearVelocity" then
                 if uis:IsKeyDown(togs.EntitySpeed.Key) then
 					return value * (togs.EntitySpeed.Rate/20+1)
 				end
