@@ -2,7 +2,7 @@ local ret = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/GFXT
 local togs = {
     SilentAim = {
         Toggled = false;
-        Fov = 250;
+        Fov = 150;
         Wallcheck = false;
         FovCircle = false;
     };
@@ -33,6 +33,10 @@ local togs = {
 		Tracers = false;
 		TracerMouse = false;
 	};
+	AutoSemiGod = {
+		Toggled = false;
+		Rate = 26;
+	};
     NoSpread = false;
 	InfJump = false;
 	TriggerBot = false;
@@ -40,7 +44,11 @@ local togs = {
 	Killaura = false;
 	AutoReload = false;
 	AutoDrink = false;
+	InfEnergy = false;
+	NCS = false;
 }
+local PlayerSelected
+
 local esp = togs.Esp
 
 local fovcircle = Drawing.new("Circle")
@@ -375,7 +383,7 @@ end
 
 local function Hasnt(inst)
 	if inst:FindFirstChild("NameTag") and inst.NameTag:FindFirstChild("TextLabel") then
-		return inst.NameTag.TextLabel.TextColor3
+		return inst.NameTag.TextLabel.TextColor3, inst.NameTag
 	end
 end
 
@@ -450,20 +458,63 @@ local function UpdateEsp(v) -- good luck reading any of this
 	end
 end
 
-local function SaveData(data)
-    local stuf = hts:JSONEncode(data)
-    writefile("athenaconfig.json",stuf)
+local function SemiGod()
+	local _,nt = Hasnt(lp.Character)
+	if nt then
+		nt:Clone().Parent = lp.Character
+		nt:Destroy()
+	end
+end
+
+local function SaveData(data) -- this is a sign of me being super tired and trying to make a save data 
+	local fs = ""
+	local t = typeof
+	for i,v in pairs(togs) do
+		if table.find({"EnumItem","boolean","number"},t(v)) then
+			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = "..tostring(v)..";\n"
+			continue
+		end
+
+		if t(v) == "string" then
+			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = \""..v.."\";\n"
+			continue
+		end
+
+		if t(v) == "table" then
+			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = {\n"
+
+			for i2,v2 in pairs(v) do
+				if table.find({"EnumItem","boolean","number"},t(v2)) then
+					fs = fs..(' '):rep(4)..'["'..i2..'"]'.." = "..tostring(v2)..";\n"
+					continue
+				end
+			end
+
+			if t(v) == "string" then
+				fs = fs..(' '):rep(4)..'["'..i..'"]'.." = \""..v.."\";\n"
+				continue
+			end
+
+			fs = fs..'};\n'
+		end
+	end
+    writefile("athenaconfig.lua","return {\n"..fs.."\n}")
 end
 
 local function LoadData()
-    assert(isfile("athenaconfig.json"),writefile("athenaconfig.json"))
-    local data = readfile("athenaconfig.json")
-    togs = hts:JSONDecode(data)
+	if not isfile("athenaconfig.lua") then
+		writefile("athenaconfig.lua","")
+		return
+	end
+    local data = loadstring(readfile("athenaconfig.lua"))() -- cuz krnl just never thought of loadfile...
+	togs = data
 end
 
 for i,v in pairs(plrs:GetChildren()) do
-	table.insert(playernames,v)
+	table.insert(playernames,v.Name)
 end
+
+LoadData()
 
 CharacterAdded(lp.Character)
 connections["LocalPlayerCharacterAdded"] = lp.CharacterAdded:Connect(CharacterAdded)
@@ -531,18 +582,22 @@ connections['TriggerBotRenderStepped'] = run.RenderStepped:Connect(function()
 	end
 end)
 
-connections["NoclipRenderStepped"] = run.RenderStepped:Connect(function()
-	if uis:IsKeyDown(togs.Noclip.Key) and lp.Character and lp.Character.PrimaryPart then
-		lp.Character.PrimaryPart.CanCollide = not togs.Noclip.Toggled
+connections["NoclipStepped"] = run.Stepped:Connect(function()
+	if togs.Noclip.Toggled and uis:IsKeyDown(togs.Noclip.Key) then
+		for i,v in next, lp.Character:GetDescendants() do
+			if v:IsA("BasePart") then
+				v.CanCollide = false
+			end
+		end
 	end
 end)
 
---[[connections["WalkspeedRenderStepped"] = run.RenderStepped:Connect(function()
-	if uis:IsKeyDown(togs.Walkspeed.Key) and uis:GetFocusedTextBox() == nil then
+connections["WalkspeedRenderStepped"] = run.RenderStepped:Connect(function()
+	if uis:IsKeyDown(togs.Walkspeed.Key) and not uis:GetFocusedTextBox() then
 		local c = lp.Character:GetPivot()
 		lp.Character:PivotTo(c + c.LookVector * togs.Walkspeed.Rate)
 	end
-end)]]
+end)
 
 local lib = ret:Library()
 
@@ -550,30 +605,62 @@ local Player = lib:Window("Player")
 local World = lib:Window("World")
 local Render = lib:Window("Render")
 local Combat = lib:Window("Combat")
+local Config = lib:Window("Config")
+local Misc = lib:Window("Misc")
 
 Player:Toggle("Auto Drink",togs.AutoDrink,function(t)
 	togs.AutoDrink = t
+end)
+
+local entspeed = Player:ToggleDropdown("Entity Speed",togs.EntitySpeed.Toggled,function(t)
+	togs.EntitySpeed.Toggled = t
+end)
+
+entspeed:Slider("Speed",1,15,togs.EntitySpeed.Rate,togs.EntitySpeed.Rate,function(t)
+	togs.EntitySpeed.Rate = t
+end)
+
+entspeed:Keybind("Keybind",togs.EntitySpeed.Key,function(t)
+	togs.EntitySpeed.Key = t
+end)
+
+Player:Toggle("Infinite Energy",togs.InfEnergy,function(t)
+	togs.InfEnergy = t
 end)
 
 Player:Toggle("Infinite Jump",togs.InfJump,function(t)
 	togs.InfJump = t
 end)
 
-Player:Toggle("Anti NLR",togs.AntiNlr,function(t)
+Player:Toggle("Anti Nlr",togs.AntiNlr,function(t)
 	togs.AntiNlr = t
 end)
 
+Player:Button("Semi-God",SemiGod)
+
 Player:Toggle("Infinite Hunger",togs.InfHunger,function(t)
 	togs.InfHunger = t
+	lp.PlayerData.Hunger.Value = 100
+end)
+
+local thing = Player:ToggleDropdown("Auto Semi-God",togs.AutoSemiGod.Toggled,function(t)
+	togs.AutoSemiGod.Toggled = t
+	local h = lp.Charactr and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
+	if h and h.Health <= togs.AutoSemiGod.Rate and t then
+		SemiGod()
+	end
+end)
+
+thing:Slider("Health",1,150,togs.AutoSemiGod.Rate,false,function(t)
+	togs.AutoSemiGod.Rate = t
+	local h = lp.Charactr and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
+	if h and h.Health <= t and togs.AutoSemiGod.Toggled then
+		SemiGod()
+	end
 end)
 
 Player:Button("Incognito Mode",function()
 
-end)
-
-Player:Toggle("No Camera Shake",togs.NCS,function(t)
-	togs.NCS = t
-	getrenv()._G.CSH = t and function()end or oldshake
 end)
 
 Player:Toggle("Anti Afk",togs.AntiAfk,function(t)
@@ -583,12 +670,26 @@ Player:Toggle("Anti Afk",togs.AntiAfk,function(t)
 	end)
 end)
 
-Player:Toggle("NoClip",togs.Noclip.Toggled,function(t)
+local thing = Player:SplitFrame()
+
+thing:Toggle("NoClip",togs.Noclip.Toggled,function(t)
 	togs.Noclip.Toggled = t
 end)
 
-Player:Keybind("NoClip Key",togs.Noclip.Key,function(t)
+thing:Keybind("Key",togs.Noclip.Key,function(t)
 	togs.Noclip.Key = t
+end)
+
+local thing = Player:ToggleDropdown("Walkspeed",togs.Walkspeed.Toggled,function(t)
+	togs.Walkspeed.Toggled = t
+end)
+
+thing:Keybind("Key",togs.Walkspeed.Key,function(t)
+	togs.Walkspeed.Key = t
+end)
+
+thing:Slider("Speed",1,15,togs.Walkspeed.Rate,true,function(t)
+	togs.Walkspeed.Rate = t
 end)
 
 World:Toggle("FullBright",togs.FullBright,function(t)
@@ -620,6 +721,10 @@ end)
 
 thing:TextBox("Cursor Id",{},function(t)
 	togs.Cursor.Id = t
+end)
+
+Render:Slider("Refresh Rate",0,10,0,true,function(t)
+	esp["Refresh Rate"] = t
 end)
 
 Render:Toggle("Player Esp",esp["Player Esp"],function(t)
@@ -664,6 +769,15 @@ Combat:Toggle("Trigger Bot",togs.TriggerBot,function(t)
 	togs.TriggerBot = t
 end)
 
+Combat:Toggle("No Camera Shake",togs.NCS,function(t)
+	togs.NCS = t
+	getrenv()._G.CSH = t and function()end or oldshake
+end)
+
+Combat:Toggle("No Spread",togs.NoSpread,function(t)
+	togs.NoSpread = t
+end)
+
 Combat:Button("Sniper Shotgun",function()
 	local th = lp.Character and lp.Character:FindFirstChild("Remington")
 	if th and th:FindFirstChild("LocalScript") then
@@ -685,18 +799,6 @@ Combat:Button("Weapon Multiplier",function()
 	end
 end)
 
-local entspeed = Combat:ToggleDropdown("Entity Speed",togs.EntitySpeed.Toggled,function(t)
-	togs.EntitySpeed.Toggled = t
-end)
-
-entspeed:Slider("Speed",1,15,7,togs.EntitySpeed.Rate,function(t)
-	togs.EntitySpeed.Rate = t
-end)
-
-entspeed:Keybind("Keybind",togs.EntitySpeed.Key,function(t)
-	togs.EntitySpeed.Key = t
-end)
-
 local thing = Combat:ToggleDropdown("Silent Aim",togs.SilentAim.Toggled,function(t)
 	togs.SilentAim.Toggled = t
 end)
@@ -705,7 +807,7 @@ thing:Toggle("Fov Circle",togs.SilentAim.FovCircle,function(t)
 	togs.SilentAim.FovCircle = t
 end)
 
-thing:Slider("Fov Size",1,750,150,togs.SilentAim.Fov,function(t)
+thing:Slider("Fov Size",1,750,togs.SilentAim.Fov,togs.SilentAim.Fov,function(t)
 	togs.SilentAim.Fov = t
 end)
 
@@ -733,6 +835,12 @@ task.spawn(function()
 	end
 end)
 
+task.spawn(function()
+	while task.wait(2/2*2) do
+		SaveData(togs)
+	end
+end)
+
 local old2; old2 = hookmetamethod(game,"__index",function(...)
 	local args = {...}
 	local value = old2(unpack(args))
@@ -741,35 +849,37 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 	local i = args[1]
 	local cs = getcallingscript()
 
-	if togs.SilentAim.Toggled and v == "Hit" and i == lp:GetMouse() and cs.Parent and cs.Parent:IsA("Tool") then
-		local c = ClosestToMouse()
-		local r = GetRandomPart(c)
-		if c and r then
-			return r:GetPivot()
+	if not checkcaller() then
+		if togs.SilentAim.Toggled and v == "Hit" and i == lp:GetMouse() and cs.Parent and cs.Parent:IsA("Tool") then
+			local c = ClosestToMouse()
+			local r = GetRandomPart(c)
+			if c and r then
+				return r:GetPivot()
+			end
 		end
-	end
 
-	if togs.InfHunger and v == "Value" and ns == "Hunger" then
-		return 100
-	end
+		if v == "Value" then
+			if togs.InfHunger and ns == "Hunger" then
+				return 100
+			end
 
-	if togs.EntitySpeed.Toggled then
-        if v == "AssemblyLinearVelocity" and i.Name == "HumanoidRootPart" then
-            if uis:IsKeyDown(togs.EntitySpeed.Key) then
-                return value * (togs.EntitySpeed.Rate/20+1)
-            end
-        end
+			if togs.InfEnergy and ns == "GadgetFuel" then
+				return 1000
+			end
+		end
 
-		if v == "Velocity" then
-			if i:GetFullName():find("Vehicles") then
-				if value.magnitude > 500 then
-					return Vector3.new()
-				end
+		if togs.EntitySpeed.Toggled then
+			if v == "Velocity" then
+				if i:GetFullName():find("Vehicles") then
+					if value.magnitude > 500 then
+						return Vector3.new()
+					end
 
-				local seat = lp.Character.Humanoid.SeatPart
-				if seat and seat:GetFullName():find("Vehicles") and uis:IsKeyDown(togs.EntitySpeed.Key) then
-					local part = seat.Parent:FindFirstChild("Main")
-					part:ApplyImpulse(part:GetPivot().lookVector * togs.EntitySpeed.Rate/10 * ((uis:IsKeyDown(Enum.KeyCode.W) and 1000) or (uis:IsKeyDown(Enum.KeyCode.S) and -1000) or 1))
+					local seat = lp.Character.Humanoid.SeatPart
+					if seat and seat:GetFullName():find("Vehicles") and uis:IsKeyDown(togs.EntitySpeed.Key) then
+						local part = seat.Parent:FindFirstChild("Main")
+						part:ApplyImpulse(part:GetPivot().lookVector * togs.EntitySpeed.Rate/10 * ((uis:IsKeyDown(Enum.KeyCode.W) and 1000) or (uis:IsKeyDown(Enum.KeyCode.S) and -1000) or 1))
+					end
 				end
 			end
 		end
@@ -781,7 +891,7 @@ end)
 local mrh; mrh = hookfunction(math.random,function(...)
     local cs = getcallingscript()
     local a = {...}
-    if togs.NoSpread and cs and cs.Parent and cs:IsA('LocalScript') and not a[1] == 1 and not checkcaller() then
+    if togs.NoSpread and cs and cs.Parent and cs:IsA('LocalScript') and not table.find(a,1) and not checkcaller() then
         return 0
     end
 
@@ -805,6 +915,28 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 				keyrelease(0x52)
 			end)
 		end
+	end
+
+	if gnm == "FireServer" and ns == "MenuActionEvent" then
+		if args[1] == 33 and togs.AutoReload then
+			local am = tostring(args[6].GetAttribute(args[6],"Ammo"))
+			if am == '1' or am == '0' then
+				task.spawn(function()
+					task.wait(.2)
+					keypress(0x52)
+					task.wait()
+					keyrelease(0x52)
+				end)
+			end
+		end
+
+		if args[1] == 26 then
+			return
+		end
+	end
+
+	if gnm == "Destroy" and ns == "Humanoid" and togs.DCB then
+		return
 	end
 
 	if not cc and gnm == "Raycast" and cs and cs.Parent == game.ReplicatedStorage.Modules.TS and togs.SilentAim.Toggled then
