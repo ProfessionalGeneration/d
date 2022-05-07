@@ -333,7 +333,7 @@ function ret:Library(Name)
 			UIGradient.Rotation = 90
 			UIGradient.Parent = Toggle
 			
-			if b then f() end
+			if b then f(b) end
 
 			TextButton.MouseButton1Down:Connect(function()
 				f(not tog)
@@ -987,7 +987,7 @@ function ret:Library(Name)
 				UIGradient.Rotation = 90
 				UIGradient.Parent = Toggle
 				
-				if b then f() end
+				if b then f(b) end
 	
 				TextButton.MouseButton1Down:Connect(function()
 					f(not tog)
@@ -1349,7 +1349,7 @@ function ret:Library(Name)
 					UIGradient.Rotation = 90
 					UIGradient.Parent = Toggle
 					
-					if b then f() end
+					if b then f(b) end
 		
 					TextButton.MouseButton1Down:Connect(function()
 						f(not tog)
