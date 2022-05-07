@@ -754,13 +754,13 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 	end
 
 	if togs.EntitySpeed.Toggled then
-		if v == "Velocity" then
-            if i.Name == "AssemblyLinearVelocity" then
-                if uis:IsKeyDown(togs.EntitySpeed.Key) then
-					return value * (togs.EntitySpeed.Rate/20+1)
-				end
+        if v == "AssemblyLinearVelocity" and i.Name == "HumanoidRootPart" then
+            if uis:IsKeyDown(togs.EntitySpeed.Key) then
+                return value * (togs.EntitySpeed.Rate/20+1)
             end
+        end
 
+		if v == "Velocity" then
 			if i:GetFullName():find("Vehicles") then
 				if value.magnitude > 500 then
 					return Vector3.new()
