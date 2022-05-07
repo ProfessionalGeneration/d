@@ -332,6 +332,8 @@ function ret:Library(Name)
 			UIGradient.Color = ((tog and onc) or (not tog and ofc))
 			UIGradient.Rotation = 90
 			UIGradient.Parent = Toggle
+			
+			if b then f() end
 
 			TextButton.MouseButton1Down:Connect(function()
 				f(not tog)
@@ -984,6 +986,8 @@ function ret:Library(Name)
 				UIGradient.Color = ((tog and onc) or (not tog and ofc))
 				UIGradient.Rotation = 90
 				UIGradient.Parent = Toggle
+				
+				if b then f() end
 	
 				TextButton.MouseButton1Down:Connect(function()
 					f(not tog)
@@ -1344,6 +1348,8 @@ function ret:Library(Name)
 					UIGradient.Color = ((tog and onc) or (not tog and ofc))
 					UIGradient.Rotation = 90
 					UIGradient.Parent = Toggle
+					
+					if b then f() end
 		
 					TextButton.MouseButton1Down:Connect(function()
 						f(not tog)
