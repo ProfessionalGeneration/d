@@ -5,6 +5,7 @@ local togs = {
         Fov = 150;
         Wallcheck = false;
         FovCircle = false;
+		NoSpread = false;
     };
 	EntitySpeed = {
 		Toggled = false;
@@ -37,6 +38,9 @@ local togs = {
 		Toggled = false;
 		Rate = 26;
 	};
+	KillauraWhitelist = {
+		"";
+	};
     NoSpread = false;
 	InfJump = false;
 	TriggerBot = false;
@@ -46,6 +50,7 @@ local togs = {
 	AutoDrink = false;
 	InfEnergy = false;
 	NCS = false;
+	AutoInvisJet = false;
 }
 local PlayerSelected
 
@@ -72,30 +77,7 @@ local ffc = workspace.FindFirstChild
 local disfroml = lp.DistanceFromCharacter
 local run = game:GetService("RunService")
 local hts = game:GetService("HttpService")
-
-local things = {}
-
-for i = 1,127 do
-    table.insert(things,string.char(i))
-end
-
-local function rstring()
-    local b = math.random(5,20)
-    local s = ""
-    
-    for i = 1,b do
-        s = s..things[math.random(1,127)]
-    end
-    
-    return s
-end
-
-game:GetService("RunService"):BindToRenderStep(rstring().."FovCircle",0,function()
-    local mp = uis:GetMouseLocation()
-    fovcircle.Visible = togs.SilentAim.FovCircle and togs.SilentAim.Toggled
-    fovcircle.Radius = togs.SilentAim.Fov
-    fovcircle.Position = Vector2.new(mp.X,mp.Y)
-end)
+local sv = setmetatable({},{__index = function(s,a) return game:GetService(a) end})
 
 local weather = {}
 
@@ -257,6 +239,10 @@ local connections = {}
 local playernames = {}
 
 local function CharacterAdded(c)
+	if togs.AutoInvisJet then
+		Instance.new("Model",c:WaitForChild("Util")).Name = "Jetpack"
+	end
+
 	c:WaitForChild("HumanoidRootPart").ChildAdded:Connect(function(i)
 		if tostring(i) == "FlightVelocity" then
 			i:GetPropertyChangedSignal("Velocity"):Connect(function()
@@ -266,6 +252,13 @@ local function CharacterAdded(c)
 			end)
 		end
 	end)
+end
+
+local function HasGun(plr)
+	local b = plr and plr.Character and plr.Character:FindFirstChildOfClass("Tool")
+	if b and b:FindFirstChild("Handle") and b.Handle:FindFirstChild("Reload") then	
+		return true, b
+	end
 end
 
 local function GetRandomPart(plr)
@@ -283,12 +276,12 @@ local function GetRandomPart(plr)
 end
 
 local function ClosestToMouse()
-    local lastdis = math.huge
+    local lastdis = 225
     local plr
     for i,v in next, plrs.GetPlayers(plrs) do
         if v ~= lp and v.Character then
             local pos = getpiv(v.Character)
-            if ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 and disfroml(lp,pos.p) <= 200 then
+            if ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 and ffc(v.Character,"Head") and v.Character.Head.Transparency < 0.1  then
                 local vp,vis = wtvp(cam,pos.p)
                 if vis then
                     local mp = uis.GetMouseLocation(uis)
@@ -330,7 +323,7 @@ local function AddUpdate(thing)
 
 		if plrs:FindFirstChild(tostring(thing)) then
 			table.insert(espupdates,{
-				["Player"] = thing;
+				["Instance"] = thing;
 				["string1"] = s1;
 				["string2"] = s2;
 				["tracer"] = t;
@@ -341,7 +334,7 @@ local function AddUpdate(thing)
 
 		if thing ~= nil and thing.Parent == workspace.MoneyPrinters then
 			table.insert(espupdates,{
-				["Printer"] = thing;
+				["Instance"] = thing;
 				["string1"] = s1;
 				["string2"] = s2;
 				["tracer"] = t;
@@ -352,7 +345,7 @@ local function AddUpdate(thing)
 
 		if thing ~= nil and thing.Parent == workspace.Entities and thing.Name:find("Shipment") then
 			table.insert(espupdates,{
-				["Shipment"] = thing;
+				["Instance"] = thing;
 				["string1"] = s1;
 				["string2"] = s2;
 				["tracer"] = t;
@@ -363,7 +356,7 @@ local function AddUpdate(thing)
 
 		if thing ~= nil and thing.Parent == workspace.Entities and thing.Name == "Gun" then
 			table.insert(espupdates,{
-				["Entity"] = thing;
+				["Instance"] = thing;
 				["string1"] = s1;
 				["string2"] = s2;
 				["tracer"] = t;
@@ -382,7 +375,7 @@ local function EspCheckEnabled(str)
 end
 
 local function Hasnt(inst)
-	if inst:FindFirstChild("NameTag") and inst.NameTag:FindFirstChild("TextLabel") then
+	if inst ~= nil and inst:FindFirstChild("NameTag") and inst.NameTag:FindFirstChild("TextLabel") then
 		return inst.NameTag.TextLabel.TextColor3, inst.NameTag
 	end
 end
@@ -396,7 +389,7 @@ local function UpdateEsp(v) -- good luck reading any of this
 		local yp
 
 		if v["esptype"] == "Player Esp" then
-			local t = v["Player"]
+			local t = v["Instance"]
 			local b = Hasnt(t.Character)
 			if t.Character and t.Character:FindFirstChild("Humanoid") then
 				string1 = t.Name.." ["..tostring(math.round(t.Character.Humanoid.Health)).."/"..tostring(t.Character.Humanoid.MaxHealth).."]"
@@ -410,7 +403,7 @@ local function UpdateEsp(v) -- good luck reading any of this
 		end
 
 		if v["esptype"] == "Shipment Esp" then
-			local t = v["Shipment"]
+			local t = v["Instance"]
 			string1 = t.Name
 			string2 = "Uses: "..tostring(t.Int.Uses.Value).." Locked: "..tostring(t.TrueOwner.Locked.Value)
 			instance = t
@@ -418,13 +411,13 @@ local function UpdateEsp(v) -- good luck reading any of this
 		end
 
 		if v["esptype"] == "Entity Esp" then
-			string1 = v["Entity"].Int.Value
-			instance = v["Entity"]
-			color = v["Entity"]:FindFirstChildWhichIsA("BasePart").Color
+			string1 = v["Instance"].Int.Value
+			instance = v["Instance"]
+			color = v["Instance"]:FindFirstChildWhichIsA("BasePart").Color
 		end
 
 		if v["esptype"] == "Printer Esp" then
-			local t = v["Printer"]
+			local t = v["Instance"]
 			string1 = t.Name
 			string2 = "Uses: "..tostring(t.Int.Uses.Value).." Money: "..tostring(t.Int.Money.Value).."\nLocked: "..tostring(t.TrueOwner.Locked.Value)
 			instance = t
@@ -466,39 +459,36 @@ local function SemiGod()
 	end
 end
 
-local function SaveData(data) -- this is a sign of me being super tired and trying to make a save data 
+local function SaveData() -- this is a sign of me being super tired and trying to make a save data 
 	local fs = ""
 	local t = typeof
+	local s = "    "
 	for i,v in pairs(togs) do
 		if table.find({"EnumItem","boolean","number"},t(v)) then
-			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = "..tostring(v)..";\n"
-			continue
+			fs = fs..s..'["'..i..'"]'.." = "..tostring(v)..";\n"
 		end
 
 		if t(v) == "string" then
-			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = \""..v.."\";\n"
-			continue
+			fs = fs..s..'["'..i..'"]'.." = \""..v.."\";\n"
 		end
 
 		if t(v) == "table" then
-			fs = fs..(' '):rep(4)..'["'..i..'"]'.." = {\n"
+			fs = fs..s..'["'..i..'"]'.." = {\n"
 
 			for i2,v2 in pairs(v) do
 				if table.find({"EnumItem","boolean","number"},t(v2)) then
-					fs = fs..(' '):rep(4)..'["'..i2..'"]'.." = "..tostring(v2)..";\n"
-					continue
+					fs = fs..s:rep(2)..'["'..i2..'"]'.." = "..tostring(v2)..";\n"
 				end
 			end
 
 			if t(v) == "string" then
-				fs = fs..(' '):rep(4)..'["'..i..'"]'.." = \""..v.."\";\n"
-				continue
+				fs = fs..s:rep(2)..'["'..i..'"]'.." = \""..v.."\";\n"
 			end
 
-			fs = fs..'};\n'
+			fs = fs..s..'};\n'
 		end
 	end
-    writefile("athenaconfig.lua","return {\n"..fs.."\n}")
+    writefile("athenaconfig.lua","return {\n"..fs.."}")
 end
 
 local function LoadData()
@@ -508,6 +498,14 @@ local function LoadData()
 	end
     local data = loadstring(readfile("athenaconfig.lua"))() -- cuz krnl just never thought of loadfile...
 	togs = data
+end
+
+local function CheckDrawingExists(check,type)
+	for i,v in pairs(espupdates) do
+		if v['esptype'] == type and check == v['Instance'] then
+			return true
+		end
+	end
 end
 
 for i,v in pairs(plrs:GetChildren()) do
@@ -525,9 +523,16 @@ connections["InputBegan"] = uis.InputBegan:Connect(function(key,m)
 	end
 end)
 
+connections['DrawingRenderStepped'] = run.RenderStepped:Connect(function(t)
+	local mp = uis:GetMouseLocation()
+	fovcircle.Visible = togs.SilentAim.FovCircle and togs.SilentAim.Toggled
+	fovcircle.Radius = togs.SilentAim.Fov
+	fovcircle.Position = Vector2.new(mp.X,mp.Y)
+end)
+
 connections["WorkspaceAdded"] = workspace.ChildAdded:Connect(function(child)
 	task.wait()
-	if child.Name == "NL" then
+	if child.Name == "NL" and togs.AntiNlr then
 		child:Destroy()
 	end
 end)
@@ -540,6 +545,10 @@ end)
 
 connections["BackpackAdded"] = lp.Backpack.ChildAdded:Connect(function(item)
 	task.wait()
+	local b = item.Name:find("Bloxy Cola") and item
+	if togs.AutoDrink and item then
+		game:GetService("ReplicatedStorage").Events.ToolsEvent:FireServer(4,item)
+	end
 end)
 
 connections["EntityAdded"] = workspace.Entities.ChildAdded:Connect(function(item)
@@ -593,7 +602,7 @@ connections["NoclipStepped"] = run.Stepped:Connect(function()
 end)
 
 connections["WalkspeedRenderStepped"] = run.RenderStepped:Connect(function()
-	if uis:IsKeyDown(togs.Walkspeed.Key) and not uis:GetFocusedTextBox() then
+	if uis:IsKeyDown(togs.Walkspeed.Key) and togs.Walkspeed.Toggled and not uis:GetFocusedTextBox() then
 		local c = lp.Character:GetPivot()
 		lp.Character:PivotTo(c + c.LookVector * togs.Walkspeed.Rate)
 	end
@@ -605,23 +614,24 @@ local Player = lib:Window("Player")
 local World = lib:Window("World")
 local Render = lib:Window("Render")
 local Combat = lib:Window("Combat")
-local Config = lib:Window("Config")
-local Misc = lib:Window("Misc")
+local Util = lib:Window("Utility")
+local Set = lib:Window("Settings")
 
 Player:Toggle("Auto Drink",togs.AutoDrink,function(t)
 	togs.AutoDrink = t
 end)
 
-local entspeed = Player:ToggleDropdown("Entity Speed",togs.EntitySpeed.Toggled,function(t)
-	togs.EntitySpeed.Toggled = t
+Player:Button("Invis Jet",function()
+	if lp.Character:FindFirstChild("Util") then
+		Instance.new("Model",lp.Character.Util).Name = "Jetpack"
+	end
 end)
 
-entspeed:Slider("Speed",1,15,togs.EntitySpeed.Rate,togs.EntitySpeed.Rate,function(t)
-	togs.EntitySpeed.Rate = t
-end)
-
-entspeed:Keybind("Keybind",togs.EntitySpeed.Key,function(t)
-	togs.EntitySpeed.Key = t
+Player:Toggle("Auto Invis Jet",togs.AutoInvisJet,function(t)
+	togs.AutoInvisJet = t
+	if t and lp.Character:FindFirstChild("Uitl") then
+		Instance.new("Model",lp.Character.Util).Name = "Jetpack"
+	end
 end)
 
 Player:Toggle("Infinite Energy",togs.InfEnergy,function(t)
@@ -632,20 +642,16 @@ Player:Toggle("Infinite Jump",togs.InfJump,function(t)
 	togs.InfJump = t
 end)
 
-Player:Toggle("Anti Nlr",togs.AntiNlr,function(t)
-	togs.AntiNlr = t
-end)
-
 Player:Button("Semi-God",SemiGod)
 
 Player:Toggle("Infinite Hunger",togs.InfHunger,function(t)
 	togs.InfHunger = t
-	lp.PlayerData.Hunger.Value = 100
+	lp.PlayerData.Hunger.Value = t and 100 or lp.PlayerData.Hunger.Value
 end)
 
 local thing = Player:ToggleDropdown("Auto Semi-God",togs.AutoSemiGod.Toggled,function(t)
 	togs.AutoSemiGod.Toggled = t
-	local h = lp.Charactr and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
+	local h = lp.Character and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
 	if h and h.Health <= togs.AutoSemiGod.Rate and t then
 		SemiGod()
 	end
@@ -653,14 +659,10 @@ end)
 
 thing:Slider("Health",1,150,togs.AutoSemiGod.Rate,false,function(t)
 	togs.AutoSemiGod.Rate = t
-	local h = lp.Charactr and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
+	local h = lp.Character and lp.Character:FindFirstChild("Humanoid") and lp.Character.Humanoid
 	if h and h.Health <= t and togs.AutoSemiGod.Toggled then
 		SemiGod()
 	end
-end)
-
-Player:Button("Incognito Mode",function()
-
 end)
 
 Player:Toggle("Anti Afk",togs.AntiAfk,function(t)
@@ -668,6 +670,13 @@ Player:Toggle("Anti Afk",togs.AntiAfk,function(t)
 	table.foreach(getconnections(lp.Idled),function(s,v)
 		v[t and "Disable" or "Enable"](v)
 	end)
+end)
+
+Player:Button("Spy Watch Bypass",function()
+	local i = lp.Character and lp.Character:FindFirstChild("Spy Watch")
+	if i then
+		sv.ReplicatedStorage.Events.ToolsEvent:FireServer(16,true,i)
+	end
 end)
 
 local thing = Player:SplitFrame()
@@ -690,6 +699,10 @@ end)
 
 thing:Slider("Speed",1,15,togs.Walkspeed.Rate,true,function(t)
 	togs.Walkspeed.Rate = t
+end)
+
+World:Toggle("Anti Nlr",togs.AntiNlr,function(t)
+	togs.AntiNlr = t
 end)
 
 World:Toggle("FullBright",togs.FullBright,function(t)
@@ -715,6 +728,18 @@ World:Toggle("Disable Kill Barriers",togs.DCB,function(t)
 	togs.DCB = t
 end)
 
+local entspeed = World:ToggleDropdown("Entity Speed",togs.EntitySpeed.Toggled,function(t)
+	togs.EntitySpeed.Toggled = t
+end)
+
+entspeed:Slider("Speed",1,15,togs.EntitySpeed.Rate,togs.EntitySpeed.Rate,function(t)
+	togs.EntitySpeed.Rate = t
+end)
+
+entspeed:Keybind("Keybind",togs.EntitySpeed.Key,function(t)
+	togs.EntitySpeed.Key = t
+end)
+
 local thing = Render:ToggleDropdown("Cursor",togs.Cursor.Toggled,function(t)
 	togs.Cursor.Toggled = t
 end)
@@ -723,13 +748,10 @@ thing:TextBox("Cursor Id",{},function(t)
 	togs.Cursor.Id = t
 end)
 
-Render:Slider("Refresh Rate",0,10,0,true,function(t)
-	esp["Refresh Rate"] = t
-end)
-
 Render:Toggle("Player Esp",esp["Player Esp"],function(t)
 	esp["Player Esp"] = t
 	for i,v in next, plrs:GetPlayers() do
+		if CheckDrawingExists(v,"Player Esp") or not t then continue end
 		if v ~= lp then
 			AddUpdate(v)
 		end
@@ -739,6 +761,7 @@ end)
 Render:Toggle("Entity Esp",esp["Entity Esp"],function(t)
 	esp["Entity Esp"] = t
 	for i,v in next, workspace.Entities:GetChildren() do
+		if CheckDrawingExists(v,"Entity Esp") or not t then continue end
 		if v.Name == "Gun" then
 			AddUpdate(v)
 		end
@@ -748,6 +771,7 @@ end)
 Render:Toggle("Shipment Esp",esp["Shipment Esp"],function(t)
 	esp["Shipment Esp"] = t
 	for i,v in next, workspace.Entities:GetChildren() do
+		if CheckDrawingExists(v,"Shipment Esp") or not t then continue end
 		if v.Name:find("Shipment") then
 			AddUpdate(v)
 		end
@@ -757,6 +781,7 @@ end)
 Render:Toggle("Printer Esp",esp["Printer Esp"],function(t)
 	esp["Printer Esp"] = t
 	for i,v in next, workspace.MoneyPrinters:GetChildren() do
+		if CheckDrawingExists(v,"Printer Esp") or not t then continue end
 		AddUpdate(v)
 	end
 end)
@@ -774,15 +799,13 @@ Combat:Toggle("No Camera Shake",togs.NCS,function(t)
 	getrenv()._G.CSH = t and function()end or oldshake
 end)
 
-Combat:Toggle("No Spread",togs.NoSpread,function(t)
-	togs.NoSpread = t
-end)
-
 Combat:Button("Sniper Shotgun",function()
 	local th = lp.Character and lp.Character:FindFirstChild("Remington")
 	if th and th:FindFirstChild("LocalScript") then
+		th.Parent = lp.Backpack
 		th.LocalScript:Destroy()
 		require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("TS"):WaitForChild("SHT")).Initiate(th, 2.1, 6, 0.4, 20, 0, 4, nil, nil, "Heavy Ammo")
+		th.Parent = lp.Character
 		lib:Note("Athena Client","Sniper Shotgunfied")
 	end
 end)
@@ -811,6 +834,10 @@ thing:Slider("Fov Size",1,750,togs.SilentAim.Fov,togs.SilentAim.Fov,function(t)
 	togs.SilentAim.Fov = t
 end)
 
+thing:Toggle("No Spread",togs.SilentAim.NoSpread,function(t)
+	togs.SilentAim.NoSpread = t
+end)
+
 thing:Toggle("Wallcheck",togs.SilentAim.Wallcheck,function(t)
 	togs.SilentAim.Wallcheck = t
 end)
@@ -820,15 +847,49 @@ local killaura = Combat:ToggleDropdown("Kill Aura",togs.Killaura,function(t)
 end)
 
 killaura:Button("Whitelist Player",function()
-	
+	if PlayerSelected then
+		local kaw = togs.KillauraWhitelist
+		local t = table.find(kaw,PlayerSelected)
+		if t then
+			table.remove(kaw,t)
+			ui:Note("Athena Client","Removed Killaura Whitelist")
+			return
+		end
+		table.insert(kaw,PlayerSelected)
+		ui:Note("Athena Client","Added Killaura Whitelist")
+	end
 end)
 
 Combat:Button("Kill Player",function()
+	if PlayerSelected then
+		local p = PlayerSelected
+		local _,gun = HasGun(lp)
+		if p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid ~= 0 then
+			repeat 
+				getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
+			until not p.Character or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0
+		end
+	end	
+end)
+
+Util:Button("Copy Node (w.i.p)",function()
+
+end)
+
+Util:Button("Copy Song",function()
 	
 end)
 
+Util:Button("Copy Outfit",function()
+
+end)
+
+Util:Toggle("Admin Notifier",togs.AdminNotifier,function(t)
+	togs.AdminNotifier = t
+end)
+
 task.spawn(function()
-	while task.wait(esp["Refresh Rate"]) do
+	while task.wait() do
 		for i,v in pairs(espupdates) do
 			pcall(UpdateEsp,v)
 		end
@@ -837,7 +898,28 @@ end)
 
 task.spawn(function()
 	while task.wait(2/2*2) do
-		SaveData(togs)
+		SaveData()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(.2) do
+		for i,v in pairs(plrs:GetPlayers()) do
+			if togs.Killaura then
+				local nt,hnt = Hasnt(v.Character)
+				local hg,g = HasGun(lp)
+				if v ~= lp and v.Character and hg and g:GetAttribute("Ammo") ~= 0 and hnt then 
+					if v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health ~= 0 and nt == Color3.fromRGB(255,33,33) then 
+						if disfroml(lp,v.Character:GetPivot().p) <= 225 and not table.find(togs.KillauraWhitelist or {},v.Name) then
+							local ray = raycast(workspace.CurrentCamera,{v.Character},{lp.Character,v.Character,workspace.Vehicles})
+							if #ray == 0 then
+								getrenv()._G.FR(v.Character:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or 2,g)
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 end)
 
@@ -850,7 +932,7 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 	local cs = getcallingscript()
 
 	if not checkcaller() then
-		if togs.SilentAim.Toggled and v == "Hit" and i == lp:GetMouse() and cs.Parent and cs.Parent:IsA("Tool") then
+		if togs.SilentAim.Toggled and not togs.SilentAim.NoSpread and v == "Hit" and i == lp:GetMouse() and cs.Parent and cs.Parent:IsA("Tool") then
 			local c = ClosestToMouse()
 			local r = GetRandomPart(c)
 			if c and r then
@@ -888,16 +970,6 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 	return old2(...)
 end)
 
-local mrh; mrh = hookfunction(math.random,function(...)
-    local cs = getcallingscript()
-    local a = {...}
-    if togs.NoSpread and cs and cs.Parent and cs:IsA('LocalScript') and not table.find(a,1) and not checkcaller() then
-        return 0
-    end
-
-    return mrh(...)
-end) -- jam told me this method :popcorn:
-
 local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 	local args = {...}
     local cs = getcallingscript()
@@ -905,33 +977,24 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 	local cc = checkcaller()
 	local ns = tostring(s)
 
-	if gnm == "FireServer" and ns == "MenuActionEvent" and args[1] == 33 and togs.AutoReload then
-		local am = tostring(args[6].GetAttribute(args[6],"Ammo"))
-		if am == '1' or am == '0' then
-			task.spawn(function()
-				task.wait(.2)
-				keypress(0x52)
-				task.wait()
-				keyrelease(0x52)
-			end)
-		end
-	end
-
 	if gnm == "FireServer" and ns == "MenuActionEvent" then
 		if args[1] == 33 and togs.AutoReload then
-			local am = tostring(args[6].GetAttribute(args[6],"Ammo"))
-			if am == '1' or am == '0' then
-				task.spawn(function()
-					task.wait(.2)
-					keypress(0x52)
-					task.wait()
-					keyrelease(0x52)
-				end)
-			end
+			local ga = args[6].GetAttribute
+			local ev = s.Parent.WeaponReloadEvent
+			args[6].SetAttribute(args[6],"Ammo",ga(args[6],"MaxAmmo")+1)
+			ev.FireServer(ev,ga(args[6],"AmmoType"),ga(args[6],"MaxAmmo"),args[6])
 		end
 
 		if args[1] == 26 then
 			return
+		end
+	end
+
+	if togs.SilentAim.Toggled and togs.SilentAim.NoSpread and s == workspace and gnm == "FindPartOnRayWithIgnoreList" and cs and cs.Parent and cs.Parent.IsA(cs.Parent,"Tool") then
+		local c = ClosestToMouse()
+		local r = GetRandomPart(c)
+		if c and r then
+			return r,r.Position,lp.GetMouse(lp).Hit.p.unit
 		end
 	end
 
