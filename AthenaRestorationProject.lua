@@ -274,6 +274,37 @@ local function HasGun(plr)
 	end
 end
 
+local function CopyNode(plrname) -- i took the Size.(xyz) adding method from luna cuz thats actually pretty smart (everything else original tho)
+	local node = workspace.Buildings:FindFirstChild(plrname)
+	local r = math.floor
+	if node then -- i know ive tried this method before and gave up on it but you can do it gfx!
+		local nodepos = node.Node:GetPivot()
+		local finalstring = "--[[\nAthena Node Copier remade by GFX\n If you have a node, it will place it there.\nElse it will place where original node was.\n]]\n\nlocal plr = game:GetService(\"Players\").LocalPlayer.Name]\nlocal node = workspace.Buildings[plr] and workspace.Buildings[plr].Node:GetPivot() or CFrame.new("..nodepos..")"
+		for i,v in pairs(getnilinstances()) do -- i cant do getnilinstances.Furniture for some reason
+			if v.Name == "Furniture" then
+				furn = v:GetChildren()
+				break
+			end
+
+			for i,v in pairs(furn) do
+				for i2,v2 in pairs(node:GetChildren()) do
+					if r(v2.Size.X+v2.Size+Y+v2.Size.Z) == r(v.Size.X+v.Size.Y+v.Size.Y) then
+						-- write thing here when get home
+					else
+						for int = 0,3,.01 do
+							local s1 = r(v.Size.X+v.Size.Y+v.Size.Y)
+							local s2 = r(v2.Size.X+v2.Size+Y+v2.Size.Z)
+							if s2*int == s1 then
+								finalstring = finalstring.."CFrame.new("..nodepos.."):ToWorldSomethingidfk()\n\n"
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 local function GetRandomPart(plr)
     if plr ~= nil and plr.Character then
         local g = {}
@@ -907,7 +938,9 @@ Combat:Button("Kill Player",function()
 end)
 
 Util:Button("Copy Node (w.i.p)",function()
-	-- me when
+	if PlayerSelected then
+		CopyNode(PlayerSelected.Name)
+	end
 end)
 
 Util:Button("Copy Song",function()
