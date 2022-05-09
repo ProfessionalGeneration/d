@@ -66,6 +66,7 @@ fovcircle.Color = Color3.fromRGB(46,59,145)
 fovcircle.Thickness = 2
 
 local oldshake = getrenv()._G.CSH
+local shoot = getrenv()._G.FR
 
 -- the things
 
@@ -899,7 +900,7 @@ Combat:Button("Kill Player",function()
 				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 then
 					break
 				end
-				getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),1,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
+				shoot(p.Character:GetPivot().p,0,gun:GetAttribute("Damage"),gun.Name:find("Laser Musket") and "LMF" or 2,gun)
 			end
 		end
 	end	
@@ -954,8 +955,7 @@ task.spawn(function()
 						if disfroml(lp,v.Character:GetPivot().p) <= 225 and not table.find(togs.KillauraWhitelist or {},v.Name) then
 							local ray = raycast(workspace.CurrentCamera,{v.Character:GetPivot().p},{lp.Character,v.Character,workspace.Vehicles})
 							if #ray == 0 then
-								getrenv()._G.FR(v.Character:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or 2,g)\
-								getrenv()._G.FR(Vector3.new(0,0,0),30,0,2,game.Players.LocalPlayer.Backpack:FindFirstChild("[Detective] Revolver"))
+								shoot(v.Character:GetPivot().p,0,g:GetAttribute("Damage"),g.Name:find("Laser Musket") and "LMF" or 2,g)\
 							end
 						end
 					end
