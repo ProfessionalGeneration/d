@@ -894,10 +894,14 @@ Combat:Button("Kill Player",function()
 	if PlayerSelected then
 		local p = PlayerSelected
 		local _,gun = HasGun(lp)
-		repeat
-			task.wait(gun:GetAttribute("BulletPerSecond"))
-			getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
-		until not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0
+		if gun then
+			while task.wait(gun:GetAttribute("BulletPerSecond")) do
+				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 then
+					break
+				end
+				getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),1,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
+			end
+		end
 	end	
 end)
 
@@ -950,7 +954,8 @@ task.spawn(function()
 						if disfroml(lp,v.Character:GetPivot().p) <= 225 and not table.find(togs.KillauraWhitelist or {},v.Name) then
 							local ray = raycast(workspace.CurrentCamera,{v.Character:GetPivot().p},{lp.Character,v.Character,workspace.Vehicles})
 							if #ray == 0 then
-								getrenv()._G.FR(v.Character:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or 2,g)
+								getrenv()._G.FR(v.Character:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or 2,g)\
+								getrenv()._G.FR(Vector3.new(0,0,0),30,0,2,game.Players.LocalPlayer.Backpack:FindFirstChild("[Detective] Revolver"))
 							end
 						end
 					end
