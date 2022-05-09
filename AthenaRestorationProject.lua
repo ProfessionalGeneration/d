@@ -295,7 +295,7 @@ local function CopyNode(plrname) -- i took the Size.(xyz) adding method from lun
 							local s1 = r(v.Size.X+v.Size.Y+v.Size.Y)
 							local s2 = r(v2.Size.X+v2.Size+Y+v2.Size.Z)
 							if s2*int == s1 then
-								finalstring = finalstring.."CFrame.new("..nodepos.."):ToWorldSomethingidfk()\n\n"
+								finalstring = finalstring.."--#"..v.Name.."\nnode:ToWorldSpace(nodepos):ToObjecttSpace("..v2:GetPivot()..")\n"
 							end
 						end
 					end
