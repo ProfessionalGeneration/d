@@ -41,6 +41,9 @@ local togs = {
 	KillauraWhitelist = {
 		"";
 	};
+	HealauraBlacklist = {
+		"";
+	};
     NoSpread = false;
 	InfJump = false;
 	TriggerBot = false;
@@ -51,6 +54,7 @@ local togs = {
 	InfEnergy = false;
 	NCS = false;
 	AutoInvisJet = false;
+	Healaura = false;
 }
 local PlayerSelected
 
@@ -254,9 +258,17 @@ local function CharacterAdded(c)
 	end)
 end
 
+local function GetPlr(str)
+	for i,v in next, plrs:GetPlayers() do
+		if v.Name:lower():find(str:lower()) or v.DisplayName:lower():find(str:lower()) then
+			return v
+		end
+	end
+end
+
 local function HasGun(plr)
 	local b = plr and plr.Character and plr.Character:FindFirstChildOfClass("Tool")
-	if b and b:FindFirstChild("Handle") and b.Handle:FindFirstChild("Reload") then	
+	if b and b:FindFirstChild("Handle") and b.Handle:FindFirstChild("Reload") then
 		return true, b
 	end
 end
@@ -281,7 +293,7 @@ local function ClosestToMouse()
     for i,v in next, plrs.GetPlayers(plrs) do
         if v ~= lp and v.Character then
             local pos = getpiv(v.Character)
-            if ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 and ffc(v.Character,"Head") and v.Character.Head.Transparency < 0.1  then
+            if ffc(v.Character,"Humanoid") and disfroml(lp,pos.p) < 225 and v.Character.Humanoid.Health ~= 0 and ffc(v.Character,"Head") and v.Character.Head.Transparency < 0.1  then
                 local vp,vis = wtvp(cam,pos.p)
                 if vis then
                     local mp = uis.GetMouseLocation(uis)
@@ -852,11 +864,29 @@ killaura:Button("Whitelist Player",function()
 		local t = table.find(kaw,PlayerSelected)
 		if t then
 			table.remove(kaw,t)
-			ui:Note("Athena Client","Removed Killaura Whitelist")
+			lib:Note("Athena Client","Removed Killaura Whitelist")
 			return
 		end
 		table.insert(kaw,PlayerSelected)
-		ui:Note("Athena Client","Added Killaura Whitelist")
+		lib:Note("Athena Client","Added Killaura Whitelist")
+	end
+end)
+
+local healaura = Combat:ToggleDropdown("Heal Aura",togs.Healaura,function(t)
+	togs.Healaura = t
+end)
+
+healaura:Button("Blacklist Player",function()
+	if PlayerSelected then
+		local kaw = togs.HealauraBlacklist
+		local t = table.find(kaw,PlayerSelected)
+		if t then
+			table.remove(kaw,t)
+			lib:Note("Athena Client","Removed Healaura Blacklist")
+			return
+		end
+		table.insert(kaw,PlayerSelected)
+		lib:Note("Athena Client","Added Healaura Blacklist")
 	end
 end)
 
@@ -864,28 +894,35 @@ Combat:Button("Kill Player",function()
 	if PlayerSelected then
 		local p = PlayerSelected
 		local _,gun = HasGun(lp)
-		if p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid ~= 0 then
-			repeat 
-				getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
-			until not p.Character or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0
-		end
+		repeat
+			task.wait(gun:GetAttribute("BulletPerSecond"))
+			getrenv()._G.FR(p.Character:GetPivot().p,gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or 2,gun)
+		until not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0
 	end	
 end)
 
 Util:Button("Copy Node (w.i.p)",function()
-
+	-- me when
 end)
 
 Util:Button("Copy Song",function()
-	
+	if PlayerSelected and workspace.Buildings:FindFirstChild(PlayerSelected.Name) and workspace.Buildings[PlayerSelected.Name]:FindFirstChild("Jukebox") then
+		writefile(PlayerSelected.Name.."'s Jukebox Id ["..math.random(1,10000).."]",tostring(workspace.Buildings[PlayerSelected.Name].Jukebox.Speaker.Sound.SoundId))
+	end
 end)
 
 Util:Button("Copy Outfit",function()
-
+	if PlayerSelected then
+		writefile(PlayerSelected.Name.."'s Outfit ["..math.random(1,10000).."]",tostring(PlayerSelected.PlayerData.Outfit.Value))
+	end
 end)
 
 Util:Toggle("Admin Notifier",togs.AdminNotifier,function(t)
 	togs.AdminNotifier = t
+end)
+
+Set:TextBox("Players Name","players",function(t)
+	PlayerSelected = GetPlr(t)
 end)
 
 task.spawn(function()
@@ -911,7 +948,7 @@ task.spawn(function()
 				if v ~= lp and v.Character and hg and g:GetAttribute("Ammo") ~= 0 and hnt then 
 					if v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health ~= 0 and nt == Color3.fromRGB(255,33,33) then 
 						if disfroml(lp,v.Character:GetPivot().p) <= 225 and not table.find(togs.KillauraWhitelist or {},v.Name) then
-							local ray = raycast(workspace.CurrentCamera,{v.Character},{lp.Character,v.Character,workspace.Vehicles})
+							local ray = raycast(workspace.CurrentCamera,{v.Character:GetPivot().p},{lp.Character,v.Character,workspace.Vehicles})
 							if #ray == 0 then
 								getrenv()._G.FR(v.Character:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or 2,g)
 							end
@@ -982,7 +1019,7 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 			local ga = args[6].GetAttribute
 			local ev = s.Parent.WeaponReloadEvent
 			args[6].SetAttribute(args[6],"Ammo",ga(args[6],"MaxAmmo")+1)
-			ev.FireServer(ev,ga(args[6],"AmmoType"),ga(args[6],"MaxAmmo"),args[6])
+			ev.FireServer(ev,ga(args[6],"AmmoType"),1,args[6])
 		end
 
 		if args[1] == 26 then
@@ -990,13 +1027,13 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 		end
 	end
 
-	if togs.SilentAim.Toggled and togs.SilentAim.NoSpread and s == workspace and gnm == "FindPartOnRayWithIgnoreList" and cs and cs.Parent and cs.Parent.IsA(cs.Parent,"Tool") then
-		local c = ClosestToMouse()
-		local r = GetRandomPart(c)
-		if c and r then
-			return r,r.Position,lp.GetMouse(lp).Hit.p.unit
-		end
-	end
+	if not cc and gnm == "FindPartOnRayWithIgnoreList" and togs.SilentAim.Toggled and togs.SilentAim.NoSpread and cs and cs.Parent and cs.Parent.IsA(cs.Parent,"Tool") and cs.IsA(cs,"LocalScript") then
+        local clos = ClosestToMouse()
+        local part = GetRandomPart(clos)
+        if clos and part then
+            return part,part.GetPivot(part).p,Vector3.new(0,0,0)
+        end
+    end
 
 	if gnm == "Destroy" and ns == "Humanoid" and togs.DCB then
 		return
@@ -1014,4 +1051,3 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 
     return nch(s,...)
 end)
-
