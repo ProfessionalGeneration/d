@@ -655,6 +655,7 @@ end)
 local lib = ret:Library()
 
 local Player = lib:Window("Player")
+local Farm = lib:Window("Farming")
 local World = lib:Window("World")
 local Render = lib:Window("Render")
 local Combat = lib:Window("Combat")
@@ -743,6 +744,30 @@ end)
 
 thing:Slider("Speed",1,15,togs.Walkspeed.Rate,true,function(t)
 	togs.Walkspeed.Rate = t
+end)
+
+Farm:Label("None of this works")
+
+Farm:Label("as of right now.")
+
+Farm:Toggle("Material Farm",togs.MaterialFarm,function(t)
+	togs.MaterialFarm = t
+end)
+
+local thing = Farm:ToggleDropdown("Printer Farm",togs.PrinterFarm.Toggled,function(t)
+	togs.PrinterFarm = t
+end)
+
+thing:Toggle("Basic Printers",togs.PrinterFarm.Basic,function(t)
+	togs.PrinterFarm.Basic = t
+end)
+
+thing:Toggle("Void",togs.PrinterFarm.Void,function(t)
+	togs.PrinterFarm.Void = t
+end)
+
+Farm:Toggle("Destroy Printers",togs.DestroyPrints,function(t)
+	togs.DestroyPrints = t
 end)
 
 World:Toggle("Anti Nlr",togs.AntiNlr,function(t)
