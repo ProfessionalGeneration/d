@@ -770,6 +770,22 @@ Farm:Toggle("Destroy Printers",togs.DestroyPrints,function(t)
 	togs.DestroyPrints = t
 end)
 
+local thing = Farm:ToggleDropdown("Farm",togs.Farm.Toggled,function(t)
+	togs.Farm.Toggled = t
+end)
+
+thing:Toggle("Corn",togs.Farm.Corn,function(t)
+	togs.Farm.Corn = t 
+end)
+
+thing:Toggle("Tomato",togs.Farm.Tomato,function(t)
+	togs.Farm.Tomato = t 
+end)
+
+thing:Toggle("Carrot",togs.Farm.Carrot,function(t)
+	togs.Farm.Carrot = t
+end)
+
 World:Toggle("Anti Nlr",togs.AntiNlr,function(t)
 	togs.AntiNlr = t
 end)
