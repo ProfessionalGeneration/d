@@ -928,10 +928,11 @@ Combat:Button("Kill Player",function()
 		local _,gun = HasGun(lp)
 		if gun then
 			while task.wait(gun:GetAttribute("BulletPerSecond")) do
-				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 then
+				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 and ffc(v.Character,"Head") then
 					break
 				end
-				shoot(p.Character:GetPivot().p,0,gun:GetAttribute("Damage"),gun.Name:find("Laser Musket") and "LMF" or 2,gun)
+				shoot(p.Character.Head:GetPivot(),gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or nil,1)
+				--_G.FR(l__mouse__3.Hit.p, damage, spread, affect, bulletamount);
 			end
 		end
 	end	
@@ -983,12 +984,27 @@ task.spawn(function()
 			if togs.Killaura then
 				local nt,hnt = Hasnt(v.Character)
 				local hg,g = HasGun(lp)
-				if v ~= lp and v.Character and hg and g:GetAttribute("Ammo") ~= 0 and hnt then 
-					if v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health ~= 0 and nt == Color3.fromRGB(255,33,33) then 
+				if v ~= lp and v.Character and hg and g:GetAttribute("Ammo") ~= 0 and hnt and ffc(v.Character,"Head") then 
+					if ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 and nt == Color3.fromRGB(255,33,33) then 
 						if disfroml(lp,v.Character:GetPivot().p) <= 225 and not table.find(togs.KillauraWhitelist or {},v.Name) then
 							local ray = raycast(workspace.CurrentCamera,{v.Character:GetPivot().p},{lp.Character,v.Character,workspace.Vehicles})
 							if #ray == 0 then
-								shoot(v.Character:GetPivot().p,0,g:GetAttribute("Damage"),g.Name:find("Laser Musket") and "LMF" or 2,g)\
+								shoot(v.Character.Head:GetPivot().p,g:GetAttribute("Damage"),0,g.Name:find("Laser Musket") and "LMF" or nil,1)
+							end
+						end
+					end
+				end
+			end
+
+			if togs.Healaura then
+				local medigun = lp.Character and (lp.Character:FindFirstChild("MediGun") or lp.Character:FindFirstChild("[Doctor] MediGun"))
+				if medigun and v ~= lp and v.Character and ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 then
+					if disfroml(lp,v.Character:GetPivot().p) <= 20 and not table.find(togs.HealauraBlacklist or {},v.Name) then
+						if not table.find({v.Character.Humanoid.MaxHealth,0},v.Character.Health) then
+							for i = 1,35 do
+								sv.ReplicatedStorage.Events.ToolsEvent:FireServer(5,v.Character.Humanoid)
+								task.wait(.043)
+								sv.ReplicatedStorage.Events.ToolsEvent:FireServer(5,medigun)
 							end
 						end
 					end
