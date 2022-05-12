@@ -1,3 +1,4 @@
+local STick = tick()
 local ret = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/GFXTI/d/main/AthenaUi.lua"))()
 local togs = {
     SilentAim = {
@@ -1243,3 +1244,5 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 
     return nch(s,...)
 end)
+
+lib:Note("Athena Client","Loaded in "..tostring(math.round(tick() - STick)).." second(s)")
