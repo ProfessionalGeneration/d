@@ -44,6 +44,17 @@ local togs = {
 	HealauraBlacklist = {
 		"";
 	};
+	Printers = {
+		Toggled = false;
+		Void = false;
+		Basic = false;
+	};
+	Farm = {
+		Toggled = false;
+		Carrot = false;
+		Corn = false;
+		Tomato = false;
+	};
     NoSpread = false;
 	InfJump = false;
 	TriggerBot = false;
@@ -55,8 +66,11 @@ local togs = {
 	NCS = false;
 	AutoInvisJet = false;
 	Healaura = false;
+	MaterialFarm = false;
+	DestroyPrints = false;
 }
 local PlayerSelected
+local Collecting = false
 
 local esp = togs.Esp
 
@@ -503,36 +517,20 @@ local function SemiGod()
 	end
 end
 
-local function SaveData() -- this is a sign of me being super tired and trying to make a save data 
-	local fs = ""
-	local t = typeof
-	local s = "    "
-	for i,v in pairs(togs) do
-		if table.find({"EnumItem","boolean","number"},t(v)) then
-			fs = fs..s..'["'..i..'"]'.." = "..tostring(v)..";\n"
-		end
-
-		if t(v) == "string" then
-			fs = fs..s..'["'..i..'"]'.." = \""..v.."\";\n"
-		end
-
-		if t(v) == "table" then
-			fs = fs..s..'["'..i..'"]'.." = {\n"
-
+local function SaveData(ba) 
+	local b = ba
+	for i,v in pairs(b) do
+		if type(v) == 'table' then
 			for i2,v2 in pairs(v) do
-				if table.find({"EnumItem","boolean","number"},t(v2)) then
-					fs = fs..s:rep(2)..'["'..i2..'"]'.." = "..tostring(v2)..";\n"
+				if i2 == "Key" and type(v2) ~= "string" then
+					b[i][i2] = tostring(v2):sub(14)
+					print(b[i][i2],type(b[i][i2]))
 				end
 			end
-
-			if t(v) == "string" then
-				fs = fs..s:rep(2)..'["'..i..'"]'.." = \""..v.."\";\n"
-			end
-
-			fs = fs..s..'};\n'
 		end
 	end
-    writefile("athenaconfig.lua","return {\n"..fs.."}")
+	local encode = hts:JSONEncode(b)
+    writefile("athenaconfig.lua",encode)
 end
 
 local function LoadData()
@@ -540,7 +538,18 @@ local function LoadData()
 		writefile("athenaconfig.lua","")
 		return
 	end
-    local data = loadstring(readfile("athenaconfig.lua"))() -- cuz krnl just never thought of loadfile...
+    local data = hts:JSONDecode(readfile('athenaconfig.lua'))
+	for i,v in pairs(data) do
+		if type(v) == 'table' then
+			for i2,v2 in pairs(v) do
+				if i2 == "Key" then
+					print(i2,v2)
+					data[i][i2] = Enum.KeyCode[v2]
+					print(data[i][i2],type(data[i][i2]))
+				end
+			end
+		end
+	end
 	togs = data
 end
 
@@ -603,6 +612,21 @@ end)
 connections["PrinterAdded"] = workspace.MoneyPrinters.ChildAdded:Connect(function(item)
 	task.wait()
 	AddUpdate(item)
+	if togs.DestroyPrints then
+		if table.find({"Soldier","Detective","Mayor"},lp.Job.Value) and lp.Character and lp.Character.PrimaryPart and not Collecting then
+			local opos = lp.Character:GetPivot()
+			local bat = lp.Backpack:FindFirstChild("["..lp.Job.Value.."] Baton") or lp.Character:FindFirstChild("["..lp.Job.Value.."] Baton")
+			if bat then
+				Collecting = true
+				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = item:GetPivot()}):Play()
+				task.wait(.05)
+				game:GetService("ReplicatedStorage").Events.ToolsEvent:FireServer(11,item)
+				task.wait(1)
+				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = opos}):Play()
+				Collecting = false
+			end
+		end
+	end
 end)
 
 connections['PlayerAdded'] = plrs.PlayerAdded:Connect(function(player)
@@ -754,39 +778,238 @@ Farm:Toggle("Material Farm",togs.MaterialFarm,function(t)
 	togs.MaterialFarm = t
 end)
 
-local thing = Farm:ToggleDropdown("Printer Farm",togs.PrinterFarm.Toggled,function(t)
-	togs.PrinterFarm = t
+local thing = Farm:ToggleDropdown("Printer Farm",togs.Printers.Toggled,function(t)
+	togs.Printers.Toggled = t
 end)
 
-thing:Toggle("Basic Printers",togs.PrinterFarm.Basic,function(t)
-	togs.PrinterFarm.Basic = t
+thing:Toggle("Basic Printers",togs.Printers.Basic,function(t)
+	togs.Printers.Basic = t
 end)
 
-thing:Toggle("Void",togs.PrinterFarm.Void,function(t)
-	togs.PrinterFarm.Void = t
+thing:Toggle("Void",togs.Printers.Void,function(t)
+	togs.Printers.Void = t
 end)
 
 Farm:Toggle("Destroy Printers",togs.DestroyPrints,function(t)
 	togs.DestroyPrints = t
 end)
 
-local thing = Farm:ToggleDropdown("Farm",togs.Farm.Toggled,function(t)
+local thing = Farm:ToggleDropdown("Farm",false,function(t)
 	togs.Farm.Toggled = t
+	if t then
+		local lw
+		local be = sv.ReplicatedStorage.Events.BuildingEvent
+		local node = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name]
+		local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and game:GetService("Workspace").Buildings[lp.Name].Node:GetPivot()
+		if not game:GetService("Workspace").Buildings:FindFirstChild(lp.Name) then
+			local pos = CFrame.new(lp.Character:GetPivot().p + Vector3.new(0,600,0))
+			be:FireServer(1, "Node", pos)
+			node = workspace.Buildings:WaitForChild(lp.Name)
+			nodepiv = node:WaitForChild("Node"):GetPivot()
+		end
+		be:FireServer(1, "Resizable Wall", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-759.291565, 313.015594, -432.407166, 0, 0, 1, 0, 1, -0, -1, 0, 0))))
+		lw = node.ChildAdded:Wait()
+		lw.ChildAdded:Wait()
+		be:FireServer(5, lw, lw:GetPivot(), nil, BrickColor.new("Camo"), nil, nil, "Grass")
+		be:FireServer(7, lw, lw:GetPivot(), nil, Vector3.new(24, 1, 16))
+		be:FireServer(1, "Resizable Wall", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-759.291565, 312.715594, -432.407166, 0, 0, 1, 0, 1, -0, -1, 0, 0))))
+		lw = node.ChildAdded:Wait()
+		lw.ChildAdded:Wait()
+		be:FireServer(5, lw, lw:GetPivot(), nil, BrickColor.new("Pine Cone"), nil, nil, "Grass")
+		be:FireServer(7, lw, lw:GetPivot(), nil, Vector3.new(24.5, .6, 16.5))
+		be:FireServer(1, "Capital Cargo Station", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-759.81311, 313.515594, -422.56955, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		if togs.Farm.Carrot then
+			be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.581116, 313.515594, -427.847656, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+			be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.031921, 313.515594, -427.848389, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		end
+
+		if togs.Farm.Tomato then
+			be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.583008, 313.515594, -434.33609, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+			be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.032959, 313.515594, -434.336761, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		end
+
+		if togs.Farm.Corn then
+			be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.018311, 313.515594, -440.827545, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+			be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.58667, 313.515594, -440.826691, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		end
+
+		sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = lw:GetPivot() + lw:GetPivot().UpVector * 5}):Play()
+		task.wait(.05)
+
+		for i,v in pairs(node:GetChildren()) do
+			task.spawn(function()
+				if (v.Name == "Corn Farm" and togs.Farm.Corn) or (v.Name == "Tomato Farm" and togs.Farm.Tomato) or (v.Name == "Carrot Farm" and togs.Farm.Carrot) then
+					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
+						local val = v['3'].Transparency
+						if val == 0 then
+							if Collecting then repeat task.wait() until not Collecting end
+							Collecting = true
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+							local item = lp.Character.ChildAdded:Wait()
+							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
+							item.Parent = lp.Character
+							task.delay(.05,function()
+								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
+								lp.Character.ChildRemoved:Wait()
+								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+								task.delay(.05,function()
+									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+								end)
+							end)
+							Collecting = false
+						end
+					end)
+
+					Collecting = true
+					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+					task.wait(.05)
+					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+					Collecting = false
+				end
+			end)
+		end
+	end
 end)
 
 thing:Toggle("Corn",togs.Farm.Corn,function(t)
-	togs.Farm.Corn = t 
+	togs.Farm.Corn = t
+	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
+	local node = nodepiv and workspace.Buildings[lp.Name]
+	if t and nodepiv and togs.Farm.Toggled then
+		local be = sv.ReplicatedStorage.Events.BuildingEvent
+		be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.018311, 313.515594, -440.827545, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.58667, 313.515594, -440.826691, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		
+		for i,v in pairs(node:GetChildren()) do
+			task.spawn(function()
+				if v.Name == "Corn Farm" then
+					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
+						local val = v['3'].Transparency
+						if val == 0 then
+							if Collecting then repeat task.wait() until not Collecting end
+							Collecting = true
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+							local item = lp.Character.ChildAdded:Wait()
+							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
+							item.Parent = lp.Character
+							task.delay(.05,function()
+								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
+								lp.Character.ChildRemoved:Wait()
+								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+								task.delay(.05,function()
+									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+								end)
+							end)
+							Collecting = false
+						end
+					end)
+
+					Collecting = true
+					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+					task.wait(.05)
+					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+					Collecting = false
+				end
+			end)
+		end
+	end
 end)
 
 thing:Toggle("Tomato",togs.Farm.Tomato,function(t)
-	togs.Farm.Tomato = t 
+	togs.Farm.Tomato = t
+
+	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
+	local node = nodepiv and workspace.Buildings[lp.Name]
+	if t and nodepiv and togs.Farm.Toggled then
+		local be = sv.ReplicatedStorage.Events.BuildingEvent
+		be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.583008, 313.515594, -434.33609, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.032959, 313.515594, -434.336761, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		
+		for i,v in pairs(node:GetChildren()) do
+			task.spawn(function()
+				if v.Name == "Tomato Farm" then
+					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
+						local val = v['3'].Transparency
+						if val == 0 then
+							if Collecting then repeat task.wait() until not Collecting end
+							Collecting = true
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+							local item = lp.Character.ChildAdded:Wait()
+							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
+							item.Parent = lp.Character
+							task.delay(.05,function()
+								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
+								lp.Character.ChildRemoved:Wait()
+								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+								task.delay(.05,function()
+									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+								end)
+							end)
+							Collecting = false
+						end
+					end)
+				end
+
+				Collecting = true
+				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+				task.wait(.05)
+				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+				Collecting = false
+			end)
+		end
+	end
 end)
 
 thing:Toggle("Carrot",togs.Farm.Carrot,function(t)
 	togs.Farm.Carrot = t
+
+	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
+	local node = nodepiv and workspace.Buildings[lp.Name]
+	if t and nodepiv and togs.Farm.Toggled then
+		local be = sv.ReplicatedStorage.Events.BuildingEvent
+		be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.581116, 313.515594, -427.847656, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.031921, 313.515594, -427.848389, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
+		
+		for i,v in pairs(node:GetChildren()) do
+			task.spawn(function()
+				if v.Name == "Carrot Farm" then
+					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
+						local val = v['3'].Transparency
+						if val == 0 then
+							if Collecting then repeat task.wait() until not Collecting end
+							Collecting = true
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+							local item = lp.Character.ChildAdded:Wait()
+							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
+							item.Parent = lp.Character
+							task.delay(.05,function()
+								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
+								lp.Character.ChildRemoved:Wait()
+								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+								task.delay(.05,function()
+									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+								end)
+							end)
+							Collecting = false
+						end
+					end)
+				end
+
+				Collecting = true
+				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+				task.wait(.05)
+				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+				Collecting = false
+			end)
+		end
+	end
 end)
 
-World:Toggle("Anti Nlr",togs.AntiNlr,function(t)
+World:Toggle("Anti NLR",togs.AntiNlr,function(t)
 	togs.AntiNlr = t
 end)
 
@@ -973,7 +1196,6 @@ Combat:Button("Kill Player",function()
 					break
 				end
 				shoot(p.Character.Head:GetPivot(),gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or nil,1)
-				--_G.FR(l__mouse__3.Hit.p, damage, spread, affect, bulletamount);
 			end
 		end
 	end	
@@ -1015,7 +1237,7 @@ end)
 
 task.spawn(function()
 	while task.wait(2/2*2) do
-		SaveData()
+		SaveData(togs)
 	end
 end)
 
@@ -1041,7 +1263,7 @@ task.spawn(function()
 				local medigun = lp.Character and (lp.Character:FindFirstChild("MediGun") or lp.Character:FindFirstChild("[Doctor] MediGun"))
 				if medigun and v ~= lp and v.Character and ffc(v.Character,"Humanoid") and v.Character.Humanoid.Health ~= 0 then
 					if disfroml(lp,v.Character:GetPivot().p) <= 20 and not table.find(togs.HealauraBlacklist or {},v.Name) then
-						if not table.find({v.Character.Humanoid.MaxHealth,0},v.Character.Health) then
+						if v.Character.Humanoid.Health ~= 0 and v.Character.Humanoid.Health ~= v.Character.Humanoid.MaxHealth then
 							for i = 1,35 do
 								sv.ReplicatedStorage.Events.ToolsEvent:FireServer(5,v.Character.Humanoid)
 								task.wait(.043)
