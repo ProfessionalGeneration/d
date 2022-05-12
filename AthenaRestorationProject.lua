@@ -838,6 +838,11 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 				if table.find({"Corn Farm","Tomato Farm","Carrot Farm"},v.Name) then
 					local cap = node:WaitForChild("Capital Cargo Station",1/0)
 					if Collecting then repeat task.wait() until not Collecting end
+					Collecting = true
+					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+					task.wait(.05)
+					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+					Collecting = false
 					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
 						local val = v['3'].Transparency
 						if val == 0 then
@@ -858,13 +863,6 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 							Collecting = false
 						end
 					end)
-
-					if Collecting then repeat task.wait() until not Collecting end
-					Collecting = true
-					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-					task.wait(.05)
-					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-					Collecting = false
 				end
 			end)
 		end
@@ -873,142 +871,17 @@ end)
 
 thing:Toggle("Corn",togs.Farm.Corn,function(t)
 	togs.Farm.Corn = t
-	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
-	local node = nodepiv and workspace.Buildings[lp.Name]
-	if t and nodepiv and togs.Farm.Toggled then
-		local be = sv.ReplicatedStorage.Events.BuildingEvent
-		be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.018311, 313.515594, -440.827545, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.58667, 313.515594, -440.826691, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		
-		for i,v in pairs(node:GetChildren()) do
-			task.spawn(function()
-				if v.Name == "Corn Farm" then
-					local cap = node:WaitForChild("Capital Cargo Station",1/0)
-					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
-						local val = v['3'].Transparency
-						if val == 0 then
-							if Collecting then repeat task.wait() until not Collecting end
-							Collecting = true
-							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-							local item = lp.Character.ChildAdded:Wait()
-							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
-							item.Parent = lp.Character
-							task.delay(.05,function()
-								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
-								lp.Character.ChildRemoved:Wait()
-								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-								task.delay(.05,function()
-									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-								end)
-							end)
-							Collecting = false
-						end
-					end)
-
-					if Collecting then repeat task.wait() until not Collecting end
-					Collecting = true
-					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-					task.wait(.05)
-					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-					Collecting = false
-				end
-			end)
-		end
-	end
+	lib:Note("Athena Client","Re-enable autofarm to apply changes")
 end)
 
 thing:Toggle("Tomato",togs.Farm.Tomato,function(t)
 	togs.Farm.Tomato = t
-
-	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
-	local node = nodepiv and workspace.Buildings[lp.Name]
-	if t and nodepiv and togs.Farm.Toggled then
-		local be = sv.ReplicatedStorage.Events.BuildingEvent
-		be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.583008, 313.515594, -434.33609, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		be:FireServer(1, "Tomato Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.032959, 313.515594, -434.336761, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		
-		for i,v in pairs(node:GetChildren()) do
-			task.spawn(function()
-				if v.Name == "Tomato Farm" then
-					local cap = node:WaitForChild("Capital Cargo Station",1/0)
-					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
-						local val = v['3'].Transparency
-						if val == 0 then
-							if Collecting then repeat task.wait() until not Collecting end
-							Collecting = true
-							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-							local item = lp.Character.ChildAdded:Wait()
-							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
-							item.Parent = lp.Character
-							task.delay(.05,function()
-								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
-								lp.Character.ChildRemoved:Wait()
-								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-								task.delay(.05,function()
-									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-								end)
-							end)
-							Collecting = false
-						end
-					end)
-				end
-
-				if Collecting then repeat task.wait() until not Collecting end
-				Collecting = true
-				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-				task.wait(.05)
-				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-				Collecting = false
-			end)
-		end
-	end
+	lib:Note("Athena Client","Re-enable autofarm to apply changes")
 end)
 
 thing:Toggle("Carrot",togs.Farm.Carrot,function(t)
 	togs.Farm.Carrot = t
-
-	local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
-	local node = nodepiv and workspace.Buildings[lp.Name]
-	if t and nodepiv and togs.Farm.Toggled then
-		local be = sv.ReplicatedStorage.Events.BuildingEvent
-		be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.581116, 313.515594, -427.847656, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		be:FireServer(1, "Carrot Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-755.031921, 313.515594, -427.848389, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
-		
-		for i,v in pairs(node:GetChildren()) do
-			task.spawn(function()
-				if v.Name == "Carrot Farm" then
-					local cap = node:WaitForChild("Capital Cargo Station",1/0)
-					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
-						local val = v['3'].Transparency
-						if val == 0 then
-							if Collecting then repeat task.wait() until not Collecting end
-							Collecting = true
-							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-							local item = lp.Character.ChildAdded:Wait()
-							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
-							item.Parent = lp.Character
-							task.delay(.05,function()
-								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
-								lp.Character.ChildRemoved:Wait()
-								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-								task.delay(.05,function()
-									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-								end)
-							end)
-							Collecting = false
-						end
-					end)
-				end
-
-				if Collecting then repeat task.wait() until not Collecting end
-				Collecting = true
-				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-				task.wait(.05)
-				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-				Collecting = false
-			end)
-		end
-	end
+	lib:Note("Athena Client","Re-enable autofarm to apply changes")
 end)
 
 World:Toggle("Anti NLR",togs.AntiNlr,function(t)
