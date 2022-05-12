@@ -524,7 +524,6 @@ local function SaveData(ba)
 			for i2,v2 in pairs(v) do
 				if i2 == "Key" and type(v2) ~= "string" then
 					b[i][i2] = tostring(v2):sub(14)
-					print(b[i][i2],type(b[i][i2]))
 				end
 			end
 		end
@@ -543,9 +542,7 @@ local function LoadData()
 		if type(v) == 'table' then
 			for i2,v2 in pairs(v) do
 				if i2 == "Key" then
-					print(i2,v2)
 					data[i][i2] = Enum.KeyCode[v2]
-					print(data[i][i2],type(data[i][i2]))
 				end
 			end
 		end
@@ -838,8 +835,9 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 
 		for i,v in pairs(node:GetChildren()) do
 			task.spawn(function()
-				if (v.Name == "Corn Farm" and togs.Farm.Corn) or (v.Name == "Tomato Farm" and togs.Farm.Tomato) or (v.Name == "Carrot Farm" and togs.Farm.Carrot) then
+				if table.find({"Corn Farm","Tomato Farm","Carrot Farm"},v.Name) then
 					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+					if Collecting then repeat task.wait() until not Collecting end
 					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
 						local val = v['3'].Transparency
 						if val == 0 then
@@ -861,6 +859,7 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 						end
 					end)
 
+					if Collecting then repeat task.wait() until not Collecting end
 					Collecting = true
 					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
 					task.wait(.05)
@@ -906,6 +905,7 @@ thing:Toggle("Corn",togs.Farm.Corn,function(t)
 						end
 					end)
 
+					if Collecting then repeat task.wait() until not Collecting end
 					Collecting = true
 					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
 					task.wait(.05)
@@ -953,6 +953,7 @@ thing:Toggle("Tomato",togs.Farm.Tomato,function(t)
 					end)
 				end
 
+				if Collecting then repeat task.wait() until not Collecting end
 				Collecting = true
 				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
 				task.wait(.05)
@@ -999,6 +1000,7 @@ thing:Toggle("Carrot",togs.Farm.Carrot,function(t)
 					end)
 				end
 
+				if Collecting then repeat task.wait() until not Collecting end
 				Collecting = true
 				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
 				task.wait(.05)
