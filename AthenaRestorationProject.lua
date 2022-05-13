@@ -831,15 +831,15 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 
 		lp.Character:PivotTo(lw:GetPivot() + lw:GetPivot().UpVector * 5)
 		task.wait(1)
+		local cap = node:WaitForChild("Capital Cargo Station")
 
 		for i,v in pairs(node:GetChildren()) do
 			task.spawn(function()
 				if v.Name:find("Farm") then
-					local cap = node:WaitForChild("Capital Cargo Station")
 					if Collecting then repeat task.wait() until not Collecting end
 					Collecting = true
 					lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
-					task.wait(.05)
+					task.wait(.1)
 					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 					Collecting = false
 					v:WaitForChild("3",1/0):GetPropertyChangedSignal("Transparency"):Connect(function()
@@ -848,15 +848,16 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 							if Collecting then repeat task.wait() until not Collecting end
 							Collecting = true
 							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
+							task.wait(.1)
 							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 							local item = lp.Character.ChildAdded:Wait()
 							lp.Character:PivotTo(cap:GetPivot() + cap:GetPivot().UpVector * 2)
+							task.wait(.1)
 							item.Parent = lp.Backpack
-							task.wait(.05)
 							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
 							lp.Backpack.ChildRemoved:Wait()
 							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
-							task.wait(.25)
+							task.wait(.1)
 							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 							Collecting = false
 						end
