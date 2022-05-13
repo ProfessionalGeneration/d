@@ -73,8 +73,6 @@ local togs = {
 local PlayerSelected
 local Collecting = false
 
-local esp = togs.Esp
-
 local fovcircle = Drawing.new("Circle")
 fovcircle.NumSides = 150
 fovcircle.Color = Color3.fromRGB(46,59,145)
@@ -427,7 +425,7 @@ local function AddUpdate(thing)
 end
 
 local function EspCheckEnabled(str)
-	if esp[str] and esp[str] == true then
+	if togs.Esp[str] and togs.Esp[str] == true then
 		return true
 	end
 	return false
@@ -502,7 +500,7 @@ local function UpdateEsp(v) -- good luck reading any of this
 
 		v["tracer"].To = Vector2.new(pos.x,pos.y)
 		v["tracer"].Color = color
- 		v['tracer'].From = (esp.TracerMouse and uis:GetMouseLocation() or Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y - 100))
+ 		v['tracer'].From = (togs.Esp.TracerMouse and uis:GetMouseLocation() or Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y - 100))
 
 		v["string1"].Visible = (EspCheckEnabled(v['esptype']) and vis and instance and instance.Parent ~= nil)
 		v['string2'].Visible = (EspCheckEnabled(v['esptype']) and vis and instance and instance.Parent ~= nil)
@@ -798,8 +796,8 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 		local lw
 		local be = sv.ReplicatedStorage.Events.BuildingEvent
 		local node = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name]
-		local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and game:GetService("Workspace").Buildings[lp.Name].Node:GetPivot()
-		if not game:GetService("Workspace").Buildings:FindFirstChild(lp.Name) then
+		local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
+		if not workspace.Buildings:FindFirstChild(lp.Name) then
 			local pos = CFrame.new(lp.Character:GetPivot().p + Vector3.new(0,600,0))
 			be:FireServer(1, "Node", pos)
 			node = workspace.Buildings:WaitForChild(lp.Name)
@@ -831,16 +829,16 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 			be:FireServer(1, "Corn Farm", nodepiv:ToWorldSpace(CFrame.new(-765.164551, 312.565948, -433.252563, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-763.58667, 313.515594, -440.826691, -1, 0, 0, 0, 1, 0, 0, 0, -1))))
 		end
 
-		sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = lw:GetPivot() + lw:GetPivot().UpVector * 5}):Play()
-		task.wait(.05)
+		lp.Character:PivotTo(lw:GetPivot() + lw:GetPivot().UpVector * 5)
+		task.wait(1)
 
 		for i,v in pairs(node:GetChildren()) do
 			task.spawn(function()
-				if table.find({"Corn Farm","Tomato Farm","Carrot Farm"},v.Name) then
-					local cap = node:WaitForChild("Capital Cargo Station",1/0)
+				if v.Name:find("Farm") then
+					local cap = node:WaitForChild("Capital Cargo Station")
 					if Collecting then repeat task.wait() until not Collecting end
 					Collecting = true
-					sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
+					lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
 					task.wait(.05)
 					sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 					Collecting = false
@@ -849,18 +847,17 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 						if val == 0 then
 							if Collecting then repeat task.wait() until not Collecting end
 							Collecting = true
+							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
 							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 							local item = lp.Character.ChildAdded:Wait()
-							sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = cap:GetPivot() + cap:GetPivot().UpVector * 2}):Play()
-							item.Parent = lp.Character
-							task.delay(.05,function()
-								sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
-								lp.Character.ChildRemoved:Wait()
-								sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = v:GetPivot() + v:GetPivot().UpVector * 1.2}):Play()
-								task.delay(.05,function()
-									sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
-								end)
-							end)
+							lp.Character:PivotTo(cap:GetPivot() + cap:GetPivot().UpVector * 2)
+							item.Parent = lp.Backpack
+							task.wait(.05)
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(41,cap,item)
+							lp.Backpack.ChildRemoved:Wait()
+							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
+							task.wait(.25)
+							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
 							Collecting = false
 						end
 					end)
@@ -932,8 +929,8 @@ thing:TextBox("Cursor Id",{},function(t)
 	togs.Cursor.Id = t
 end)
 
-Render:Toggle("Player Esp",esp["Player Esp"],function(t)
-	esp["Player Esp"] = t
+Render:Toggle("Player Esp",togs.Esp["Player Esp"],function(t)
+	togs.Esp["Player Esp"] = t
 	for i,v in next, plrs:GetPlayers() do
 		if CheckDrawingExists(v,"Player Esp") or not t then continue end
 		if v ~= lp then
@@ -942,8 +939,8 @@ Render:Toggle("Player Esp",esp["Player Esp"],function(t)
 	end
 end)
 
-Render:Toggle("Entity Esp",esp["Entity Esp"],function(t)
-	esp["Entity Esp"] = t
+Render:Toggle("Entity Esp",togs.Esp["Entity Esp"],function(t)
+	togs.Esp["Entity Esp"] = t
 	for i,v in next, workspace.Entities:GetChildren() do
 		if CheckDrawingExists(v,"Entity Esp") or not t then continue end
 		if v.Name == "Gun" then
@@ -952,8 +949,8 @@ Render:Toggle("Entity Esp",esp["Entity Esp"],function(t)
 	end
 end)
 
-Render:Toggle("Shipment Esp",esp["Shipment Esp"],function(t)
-	esp["Shipment Esp"] = t
+Render:Toggle("Shipment Esp",togs.Esp["Shipment Esp"],function(t)
+	togs.Esp["Shipment Esp"] = t
 	for i,v in next, workspace.Entities:GetChildren() do
 		if CheckDrawingExists(v,"Shipment Esp") or not t then continue end
 		if v.Name:find("Shipment") then
@@ -962,16 +959,20 @@ Render:Toggle("Shipment Esp",esp["Shipment Esp"],function(t)
 	end
 end)
 
-Render:Toggle("Printer Esp",esp["Printer Esp"],function(t)
-	esp["Printer Esp"] = t
+Render:Toggle("Printer Esp",togs.Esp["Printer Esp"],function(t)
+	togs.Esp["Printer Esp"] = t
 	for i,v in next, workspace.MoneyPrinters:GetChildren() do
 		if CheckDrawingExists(v,"Printer Esp") or not t then continue end
 		AddUpdate(v)
 	end
 end)
 
-Render:Toggle("Tracers",esp.Tracers,function(t)
-	esp["Tracers"] = t
+Render:Toggle("Tracers",togs.Esp.Tracers,function(t)
+	togs.Esp["Tracers"] = t
+end)
+
+Render:Toggle("Tracer Mouse",togs.Esp.TracerMouse,function(t)
+	togs.Esp.TracerMouse = t
 end)
 
 Combat:Toggle("Trigger Bot",togs.TriggerBot,function(t)
