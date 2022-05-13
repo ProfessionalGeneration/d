@@ -1,3 +1,6 @@
+-- open sourced because i do not care.
+-- ui might not be accurate cuz exactly recreating it is way to time consuming
+
 local STick = tick()
 local ret = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/GFXTI/d/main/AthenaUi.lua"))()
 local togs = {
@@ -766,9 +769,9 @@ thing:Slider("Speed",1,15,togs.Walkspeed.Rate,true,function(t)
 	togs.Walkspeed.Rate = t
 end)
 
-Farm:Label("None of this works")
+Farm:Label("Destroy Printers and Farm")
 
-Farm:Label("as of right now.")
+Farm:Label("are the only working ones")
 
 Farm:Toggle("Material Farm",togs.MaterialFarm,function(t)
 	togs.MaterialFarm = t
