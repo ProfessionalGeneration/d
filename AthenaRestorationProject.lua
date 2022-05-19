@@ -50,7 +50,7 @@ local togs = {
 	};
 	Printers = {
 		Toggled = false;
-		Void = false;
+		Void = false; -- when i get done with most things ill make
 		Basic = false;
 	};
 	Farm = {
@@ -72,9 +72,16 @@ local togs = {
 	Healaura = false;
 	MaterialFarm = false;
 	DestroyPrints = false;
+	AInfCapacity = false;
+	AutoBuyAmmo = false;
+	HideItems = false;
+	AntiSpyCheck = false;
+	AureusFarm = false;
+	AdminNotifier = false;
 }
 local PlayerSelected
-local Collecting = false
+local Collecting
+local BreakKill
 
 local fovcircle = Drawing.new("Circle")
 fovcircle.NumSides = 150
@@ -259,6 +266,17 @@ local espupdates = {}
 local connections = {}
 local playernames = {}
 
+local function RandomString(int)
+	local charset = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+	local fstr = ""
+	for i = 1,int do
+		local r = math.random(1,#charset)
+		fstr = fstr..charset:sub(r,r)
+	end
+
+	return fstr
+end
+
 local function CharacterAdded(c)
 	if togs.AutoInvisJet then
 		Instance.new("Model",c:WaitForChild("Util")).Name = "Jetpack"
@@ -271,6 +289,12 @@ local function CharacterAdded(c)
 					i.Velocity = i.Velocity * (togs.EntitySpeed.Rate/20+1)
 				end
 			end)
+		end
+	end)
+
+	c:WaitForChild("Humanoid").HealthChanged:Connect(function(t)
+		if togs.AutoSemiGod.Toggled and togs.AutoSemiGod.Rate >= t then
+			SemiGod()
 		end
 	end)
 end
@@ -290,34 +314,88 @@ local function HasGun(plr)
 	end
 end
 
-local function CopyNode(plrname) -- i took the Size.(xyz) adding method from luna cuz thats actually pretty smart (everything else original tho)
+local function CopyNode(plrname)
 	local node = workspace.Buildings:FindFirstChild(plrname)
-	local r = math.floor
-	if node then -- i know ive tried this method before and gave up on it but you can do it gfx!
+	if node then
 		local nodepos = node.Node:GetPivot()
-		local finalstring = "--[[\nAthena Node Copier remade by GFX\n If you have a node, it will place it there.\nElse it will place where original node was.\n]]\n\nlocal plr = game:GetService(\"Players\").LocalPlayer.Name]\nlocal node = workspace.Buildings[plr] and workspace.Buildings[plr].Node:GetPivot() or CFrame.new("..nodepos..")"
-		for i,v in pairs(getnilinstances()) do -- i cant do getnilinstances.Furniture for some reason
+		local furn
+		local txt = "--[[\n█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n█      Athena Client Node Copier 	   █\n█      Instructions :                      █\n█       After copying players node         █\n█       execute the script and it will     █\n█       spawn the node in the location     █\n█ 	of your node but if you have no    █\n█ 	node it will spawn it in the       █\n█ 	location of said players node.	   █\n█	If it doesn't load fully,	   █\n█	search through the script	   █\n█	and delete 3 lines below the prop  █\n█	thats causing the issue.	   █\n█  					   █\n█	Remade By MrGFX#2906		   █\n█	ORIGINAL CREATORS		   █\n█	CΛJUNPHOΞNIX & Prefixedpixel	   █\n█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n]]--"
+		local fstr = txt.."\n\nlocal fnode = workspace.Buildings:FindFirstChild(game:GetService\"Players\".LocalPlayer.Name) and workspace.Buildings[game:GetService\"Players\".LocalPlayer.Name]:WaitForChild\"Node\":WaitForChild\"Node\"\nlocal lw"
+		
+		local function CheckSize(part1,part2)
+			local size1,size2 = Vector3.zero,Vector3.zero
+			local mult = part1.PrimaryPart.Size.X
+
+			for i,v in pairs(part1:GetChildren()) do
+				if not v:IsA("BasePart") or v == part1.PrimaryPart then continue end
+				size1 = size1 + v.Size
+			end
+
+			for i,v in pairs(part2:GetChildren()) do
+				if not v:IsA("BasePart") or v == part2.PrimaryPart then continue end
+				size2 = size2 + (v.Size * mult)
+			end
+
+			local eq = size1==size2
+			return eq
+		end
+
+		for i,v in pairs(getnilinstances()) do -- i cant do getnilinstances().Furniture for some reason
 			if v.Name == "Furniture" then
 				furn = v:GetChildren()
 				break
 			end
+		end
 
-			for i,v in pairs(furn) do
-				for i2,v2 in pairs(node:GetChildren()) do
-					if r(v2.Size.X+v2.Size+Y+v2.Size.Z) == r(v.Size.X+v.Size.Y+v.Size.Y) then
-						-- write thing here when get home
-					else
-						for int = 0,3,.01 do
-							local s1 = r(v.Size.X+v.Size.Y+v.Size.Y)
-							local s2 = r(v2.Size.X+v2.Size+Y+v2.Size.Z)
-							if s2*int == s1 then
-								finalstring = finalstring.."--#"..v.Name.."\nnode:ToWorldSpace(nodepos):ToObjecttSpace("..v2:GetPivot()..")\n"
-							end
-						end
+		fstr = fstr.."\n--#Spawn Node\nif not fnode then\n\tgame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\"Node\",CFrame.new("..tostring(nodepos).."))\n\tfnode = workspace.Buildings:WaitForChild(game:GetService\"Players\".LocalPlayer.Name):WaitForChild\"Node\":WaitForChild\"Node\"\nend\n"
+
+		for i,v2 in pairs(node:GetChildren()) do
+			local found,mat,color = nil,Enum.Material.WoodPlanks,BrickColor.White().Color
+			if v2.Name ~= "Node" then
+				for i,v3 in pairs(v2:GetChildren()) do
+					if v3:FindFirstChild"Value" then
+						mat = v3.Material
+						color = v3.Value.Value
+						break
+					end
+				end
+
+				if v2.Name == "Resizable Wall" then
+					fstr = fstr.."\n--#Spawn Resizeable Wall\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\"Resizeable Wall\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,Vector3.new("..tostring(v2:WaitForChild"cc".Size).."))\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
+					continue
+				end
+
+				if v2.Name:find("Billboard") then
+					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(7,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Text.."\",Color3.new(0.94902, 0.952941, 0.952941)})"
+					found = true
+				end
+
+				if v2.Name:find("Picture") then
+					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(29,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Image:sub(14).."\",Color3.new(0.94902, 0.952941, 0.952941)})"
+					found = true
+				end
+
+				if v2.Name == "Hat Display Case" then
+					fstr = fstr.."\n--#Spawn Hat Display Case\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(81,lw,\""..tostring(v2:WaitForChild"Data":GetAttribute"HatID").."\")"
+					found = true
+				end
+
+				if found then
+					fstr = fstr.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
+					continue
+				end
+
+				for i,v in pairs(furn) do
+					--fnode:GetPivot():ToWorldSpace(CFrame.new(rnodepiv):ToObjectSpace(CFrame.new(partpiv)))
+					local match = CheckSize(v2,v)
+					if match then
+						fstr = fstr.."\n--#Spawn "..v.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
 					end
 				end
 			end
 		end
+
+		writefile(node.Name.."_Node_"..RandomString(4)..".txt",fstr)
 	end
 end
 
@@ -531,15 +609,15 @@ local function SaveData(ba)
 		end
 	end
 	local encode = hts:JSONEncode(b)
-    writefile("athenaconfig.lua",encode)
+    writefile("athenaconfig.json",encode)
 end
 
 local function LoadData()
-	if not isfile("athenaconfig.lua") then
-		writefile("athenaconfig.lua","")
+	if not isfile("athenaconfig.json") then
+		writefile("athenaconfig.json","")
 		return
 	end
-    local data = hts:JSONDecode(readfile('athenaconfig.lua'))
+    local data = hts:JSONDecode(readfile('athenaconfig.json'))
 	for i,v in pairs(data) do
 		if type(v) == 'table' then
 			for i2,v2 in pairs(v) do
@@ -569,7 +647,7 @@ LoadData()
 CharacterAdded(lp.Character)
 connections["LocalPlayerCharacterAdded"] = lp.CharacterAdded:Connect(CharacterAdded)
 
-connections["InputBegan"] = uis.InputBegan:Connect(function(key,m)
+connections["InputBegan"] = uis.InputBegan:Connect(function(key,m) -- when will i ever use this
 	if not m then
 		
 	end
@@ -598,8 +676,8 @@ end)
 connections["BackpackAdded"] = lp.Backpack.ChildAdded:Connect(function(item)
 	task.wait()
 	local b = item.Name:find("Bloxy Cola") and item
-	if togs.AutoDrink and item then
-		game:GetService("ReplicatedStorage").Events.ToolsEvent:FireServer(4,item)
+	if togs.AutoDrink and b then
+		sv.ReplicatedStorage.Events.ToolsEvent:FireServer(4,b)
 	end
 end)
 
@@ -612,19 +690,38 @@ connections["PrinterAdded"] = workspace.MoneyPrinters.ChildAdded:Connect(functio
 	task.wait()
 	AddUpdate(item)
 	if togs.DestroyPrints then
-		if table.find({"Soldier","Detective","Mayor"},lp.Job.Value) and lp.Character and lp.Character.PrimaryPart and not Collecting then
+		if table.find({"Soldier","Detective","Mayor"},lp.Job.Value) and lp.Character and lp.Character.PrimaryPart and item:WaitForChild("TrueOwner").Value ~= lp then
 			local opos = lp.Character:GetPivot()
 			local bat = lp.Backpack:FindFirstChild("["..lp.Job.Value.."] Baton") or lp.Character:FindFirstChild("["..lp.Job.Value.."] Baton")
+			if Collecting then repeat task.wait() until not Collecting end
 			if bat then
 				Collecting = true
-				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = item:GetPivot()}):Play()
+				lp.Character:PivotTo(item:GetPivot() + item:GetPivot().UpVector * 2)
 				task.wait(.05)
-				game:GetService("ReplicatedStorage").Events.ToolsEvent:FireServer(11,item)
+				sv.ReplicatedStorage.Events.ToolsEvent:FireServer(11,item)
 				task.wait(1)
-				sv.TweenService:Create(lp.Character.PrimaryPart,TweenInfo.new(.05),{CFrame = opos}):Play()
+				lp.Character:PivotTo()
 				Collecting = false
 			end
 		end
+		return
+	end
+
+	if item:WaitForChild("TrueOwner").Value == lp then
+		item:WaitForChild("Int"):WaitForChild("Money").Changed:Connect(function(t)
+			local node = workspace.Buildings:FindFirstChild(lp.Name)
+			if t ~= 0 and togs.Printers.Toggled and node then
+				if Collecting then repeat task.wait() until not Collecting end
+				Collecting = true
+				local op = lp.Character:GetPivot()
+				lp.Character:PivotTo(item:GetPivot() + item:GetPivot().UpVector * 2)
+				task.wait(.15)
+				sv.ReplicatedStorage.Events.InteractEvent:FireServer(item)
+				lp.Character:PivotTo(op)
+				Collecting = false
+			end
+		end)
+		return
 	end
 end)
 
@@ -674,6 +771,34 @@ connections["WalkspeedRenderStepped"] = run.RenderStepped:Connect(function()
 		lp.Character:PivotTo(c + c.LookVector * togs.Walkspeed.Rate)
 	end
 end)
+
+-- sloppy connection code 😴
+
+connections["RifleAmmoChanged"] = lp.PlayerData['Rifle Ammo'].Changed:Connect(function(t)
+	if t <= 120 and togs.AutoBuyAmmo then
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,"Rifle Ammo (30x)",nil,8)
+	end
+end)
+
+connections["PistolAmmoChanged"] = lp.PlayerData['Pistol Ammo'].Changed:Connect(function(t)
+	if t <= 150 and togs.AutoBuyAmmo then
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,"Pistol Ammo (30x)",nil,8)
+	end
+end)
+
+connections["HeavyAmmoChanged"] = lp.PlayerData['Heavy Ammo'].Changed:Connect(function(t)
+	if t <= 2 and togs.AutoBuyAmmo then
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,"Heavy Ammo (10x)",nil,8)
+	end
+end)
+
+connections["SMGAmmoChanged"] = lp.PlayerData['SMG Ammo'].Changed:Connect(function(t)
+	if t <= 260 and togs.AutoBuyAmmo then
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,"SMG Ammo (60x)",nil,8)
+	end
+end)
+
+-- end of sloppy connections
 
 local lib = ret:Library()
 
@@ -740,11 +865,8 @@ Player:Toggle("Anti Afk",togs.AntiAfk,function(t)
 	end)
 end)
 
-Player:Button("Spy Watch Bypass",function()
-	local i = lp.Character and lp.Character:FindFirstChild("Spy Watch")
-	if i then
-		sv.ReplicatedStorage.Events.ToolsEvent:FireServer(16,true,i)
-	end
+Player:Toggle("Bypass Spy Checks",togs.AntiSpyCheck,function(t)
+	togs.AntiSpyCheck = t
 end)
 
 local thing = Player:SplitFrame()
@@ -769,24 +891,61 @@ thing:Slider("Speed",1,15,togs.Walkspeed.Rate,true,function(t)
 	togs.Walkspeed.Rate = t
 end)
 
-Farm:Label("Destroy Printers and Farm")
-
-Farm:Label("are the only working ones")
-
 Farm:Toggle("Material Farm",togs.MaterialFarm,function(t)
 	togs.MaterialFarm = t
 end)
 
 local thing = Farm:ToggleDropdown("Printer Farm",togs.Printers.Toggled,function(t)
 	togs.Printers.Toggled = t
+	if t then
+		local lw
+		local be = sv.ReplicatedStorage.Events.BuildingEvent
+		local node = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name]
+		local nodepiv = workspace.Buildings:FindFirstChild(lp.Name) and workspace.Buildings[lp.Name].Node:GetPivot()
+		if not workspace.Buildings:FindFirstChild(lp.Name) then
+			local k = lp.Character:GetPivot().p
+			be:FireServer(1, "Node", CFrame.new(k.X,600,k.Z, 0, 0, 1, 0, 1, -0, -1, 0, 0))
+			node = workspace.Buildings:WaitForChild(lp.Name)
+			nodepiv = node:WaitForChild("Node"):GetPivot()
+		end
+		be:FireServer(1, "Resizable Wall", nodepiv:ToWorldSpace(CFrame.new(-319.038422, 425.097076, 530.58606, 0, 0, 1, 0, 1, -0, -1, 0, 0):ToObjectSpace(CFrame.new(-314.933594, 484.577515, 568.547241, 0, 0, 1, 0, 1, -0, -1, 0, 0))))
+		lw = node.ChildAdded:Wait()
+		lw.ChildAdded:Wait()
+		be:FireServer(7, lw, lw:GetPivot(), nil, Vector3.new(16, 1, 21))
+		be:FireServer(5, lw, lw:GetPivot(), nil, BrickColor.new("Brown"), nil, nil, "WoodPlanks")
+		lp.Character:PivotTo(lw:GetPivot() + lw:GetPivot().UpVector * 2)
+		task.wait(.15)
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,togs.Printers.Basic and "Money Printer Basic" or "Money Printer Advanced",nil,8)
+		workspace.MoneyPrinters.ChildAdded:Wait()
+		task.wait(.15)
+		lp.Character:PivotTo(lw:GetPivot() + lw:GetPivot().UpVector * 5 + Vector3.new(math.random(-10,10),0,math.random(-10,10)))
+		sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,togs.Printers.Basic and "Money Printer Basic" or "Money Printer Advanced",nil,8)
+		connections["PrinterRemoved"] = workspace.MoneyPrinters.ChildRemoved:Connect(function(t)
+			if t.TrueOwner.Value == lp then
+				if Collecting then repeat task.wait() until not Collecting end
+				Collecting = true
+				local op = lp.Character:GetPivot()
+				lp.Character:PivotTo(lw:GetPivot() + lw:GetPivot().UpVector * 5 + Vector3.new(math.random(-10,10),0,math.random(-10,10)))
+				task.wait(.15)
+				sv.ReplicatedStorage.Events.MenuEvent:FireServer(2,togs.Printers.Basic and "Money Printer Basic" or "Money Printer Advanced",nil,8)
+				workspace.MoneyPrinters.ChildAdded:Wait()
+				lp.Character:PivotTo(op)
+				Collecting = false
+			end
+		end)
+	else
+		if connections["PrinterRemoved"] then
+			connections["PrinterRemoved"]:Disconnect()
+		end
+	end
 end)
 
 thing:Toggle("Basic Printers",togs.Printers.Basic,function(t)
 	togs.Printers.Basic = t
 end)
 
-thing:Toggle("Void",togs.Printers.Void,function(t)
-	togs.Printers.Void = t
+Farm:Toggle("Aureus Farm",togs.AureusFarm,function(t)
+	togs.AureusFarm = t
 end)
 
 Farm:Toggle("Destroy Printers",togs.DestroyPrints,function(t)
@@ -849,6 +1008,7 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 						local val = v['3'].Transparency
 						if val == 0 then
 							if Collecting then repeat task.wait() until not Collecting end
+							local op = lp.Character:GetPivot()
 							Collecting = true
 							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
 							task.wait(.1)
@@ -862,6 +1022,7 @@ local thing = Farm:ToggleDropdown("Farm",false,function(t)
 							lp.Character:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 1.2)
 							task.wait(.1)
 							sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(40,v)
+							lp.Character:PivotTo(op)
 							Collecting = false
 						end
 					end)
@@ -911,6 +1072,14 @@ end
 
 World:Toggle("Disable Kill Barriers",togs.DCB,function(t)
 	togs.DCB = t
+end)
+
+World:Button("Exploit Sounds",function()
+	for i,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Sound") then
+			v:Play()
+		end
+	end
 end)
 
 local entspeed = World:ToggleDropdown("Entity Speed",togs.EntitySpeed.Toggled,function(t)
@@ -993,7 +1162,7 @@ Combat:Button("Sniper Shotgun",function()
 	if th and th:FindFirstChild("LocalScript") then
 		th.Parent = lp.Backpack
 		th.LocalScript:Destroy()
-		require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("TS"):WaitForChild("SHT")).Initiate(th, 2.1, 6, 0.4, 20, 0, 4, nil, nil, "Heavy Ammo")
+		require(sv.ReplicatedStorage:WaitForChild("Modules"):WaitForChild("TS"):WaitForChild("SHT")).Initiate(th, 2.1, 6, 0.4, 20, 0, 4, nil, nil, "Heavy Ammo")
 		th.Parent = lp.Character
 		lib:Note("Athena Client","Sniper Shotgunfied")
 	end
@@ -1009,6 +1178,18 @@ Combat:Button("Weapon Multiplier",function()
 		th.LocalScript:Clone().Parent = th
 		lib:Note("Athena Client","Weapon Multiplied")
 	end
+end)
+
+Combat:Toggle("Auto Buy Ammo",togs.AutoBuyAmmo,function(t)
+	togs.AutoBuyAmmo = t
+end)
+
+Combat:Toggle("Attempt Inf Capacity",togs.AInfCapacity,function(t)
+	togs.AInfCapacity = t
+end)
+
+Combat:Toggle("Hide Items",togs.HideItems,function(t)
+	togs.HideItems = t
 end)
 
 local thing = Combat:ToggleDropdown("Silent Aim",togs.SilentAim.Toggled,function(t)
@@ -1068,21 +1249,67 @@ healaura:Button("Blacklist Player",function()
 end)
 
 Combat:Button("Kill Player",function()
+	BreakKill = false
 	if PlayerSelected then
 		local p = PlayerSelected
 		local _,gun = HasGun(lp)
 		if gun then
 			while task.wait(gun:GetAttribute("BulletPerSecond")) do
-				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 and ffc(v.Character,"Head") then
+				if not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or disfroml(lp,p.Character:GetPivot().p) > 225 or not HasGun(lp) or gun:GetAttribute("Ammo") == 0 and ffc(p.Character,"Head") or BreakKill then
 					break
 				end
-				shoot(p.Character.Head:GetPivot(),gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or nil,1)
+				shoot(p.Character.Head:GetPivot().p,gun:GetAttribute("Damage"),0,gun.Name:find("Laser Musket") and "LMF" or nil,1)
 			end
 		end
 	end	
 end)
 
-Util:Button("Copy Node (w.i.p)",function()
+Combat:Button("Fast Kill Player (BETA)",function()
+	BreakKill = false
+	if PlayerSelected then
+		local p = PlayerSelected
+		local item = lp.Character:FindFirstChildOfClass("Tool")
+		local st = 0
+		if item and p and p.Character then
+			if p.Character:FindFirstChild("ForceField") then repeat task.wait() until not p.Character:FindFirstChild("ForceField") end
+			if Collecting then repeat task.wait() until not Collecting end
+			local op = lp.Character:GetPivot()
+			Collecting = true
+			if item:FindFirstChild("Handle") and item.Handle:FindFirstChild("Reload") then
+				if p.Character:FindFirstChild("Humanoid") then
+					local h = p.Character.Humanoid
+					local i = h.Health
+					local dam = item:GetAttribute("Damage")
+					while i-dam > 15 do
+						st = st + 1
+						i = i - dam
+					end
+				end
+			end
+
+			for i = 1,st do
+				if item.Parent ~= lp.Character then break end
+				lp.Character:PivotTo(p.Character:GetPivot())
+				task.wait(item:GetAttribute("BulletPerSecond"))
+				shoot(p.Character.Head:GetPivot().p,item:GetAttribute("Damage"),0,item.Name:find("Laser Musket") and "LMF" or nil,1)
+				lp.Character:PivotTo(p.Character:GetPivot())
+			end
+
+			for i = 1,math.ceil(p.Character.Humanoid.Health/15) do
+				if item.Parent ~= lp.Character or not p.Character or not p.Character:FindFirstChild("Humanoid") or p.Character.Humanoid.Health == 0 or BreakKill or not lp.Character then break end
+				lp.Character:PivotTo(p.Character:GetPivot())
+				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(34,p.Character.Humanoid,p.Character:GetPivot())
+				p.Character:FindFirstChild("Humanoid").HealthChanged:Wait()
+				lp.Character:PivotTo(p.Character:GetPivot())
+			end
+
+			lp.Character:PivotTo(op)
+			Collecting = false
+		end
+	end
+end)
+
+Util:Button("Copy Node (BETA)",function()
 	if PlayerSelected then
 		CopyNode(PlayerSelected.Name)
 	end
@@ -1090,18 +1317,22 @@ end)
 
 Util:Button("Copy Song",function()
 	if PlayerSelected and workspace.Buildings:FindFirstChild(PlayerSelected.Name) and workspace.Buildings[PlayerSelected.Name]:FindFirstChild("Jukebox") then
-		writefile(PlayerSelected.Name.."'s Jukebox Id ["..math.random(1,10000).."]",tostring(workspace.Buildings[PlayerSelected.Name].Jukebox.Speaker.Sound.SoundId))
+		writefile(PlayerSelected.Name.."_Audio_"..RandomString(4)..".txt",tostring(workspace.Buildings[PlayerSelected.Name].Jukebox.Speaker.Sound.SoundId):sub(12))
 	end
 end)
 
 Util:Button("Copy Outfit",function()
 	if PlayerSelected then
-		writefile(PlayerSelected.Name.."'s Outfit ["..math.random(1,10000).."]",tostring(PlayerSelected.PlayerData.Outfit.Value))
+		writefile(PlayerSelected.Name.."_Outfit_"..RandomString(4)..".txt",tostring(PlayerSelected.PlayerData.Outfit.Value))
 	end
 end)
 
 Util:Toggle("Admin Notifier",togs.AdminNotifier,function(t)
 	togs.AdminNotifier = t
+end)
+
+Util:Button("Break Kill",function()
+	BreakKill = true
 end)
 
 Set:TextBox("Players Name","players",function(t)
@@ -1123,7 +1354,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-	while task.wait(.2) do
+	while task.wait(.2) do -- aura stuff
 		for i,v in pairs(plrs:GetPlayers()) do
 			if togs.Killaura then
 				local nt,hnt = Hasnt(v.Character)
@@ -1158,6 +1389,34 @@ task.spawn(function()
 	end
 end)
 
+task.spawn(function()
+	while task.wait(2) do -- misc shit
+		if togs.AureusFarm then
+			for _,__ in pairs(workspace.Buildings:GetChildren()) do
+				for i,v in pairs(__:GetChildren()) do
+					if v.Name == "Scavenge Station" and disfroml(lp,v:GetPivot().p) <= 10 then
+						Collecting = true
+						sv.ReplicatedStorage.Events.InteractEvent:FireServer(v)
+						task.wait(.5)
+						sv.ReplicatedStorage.Events.MenuAcitonEvent:FireServer(1,v)
+						local it = workspace.Drones:WaitForChild(lp.Name)
+						local ds = workspace:WaitForChild("DroneShipment"):GetPivot()
+						it:PivotTo(ds + ds.UpVector * 2)
+						task.wait(.1)
+						sv.ReplicatedStorage.Events.MenuAcitonEvent:FireServer(3)
+						it:PivotTo(v:GetPivot() + v:GetPivot().UpVector * 2)
+						task.wait(.1)
+						sv.ReplicatedStorage.Events.MenuAcitonEvent:FireServer(4)
+						task.wait(.5)
+						sv.ReplicatedStorage.Events.InteractEvent:FireServer(v)
+						Collecting = false
+					end
+				end
+			end
+		end
+	end
+end)
+
 local old2; old2 = hookmetamethod(game,"__index",function(...)
 	local args = {...}
 	local value = old2(unpack(args))
@@ -1167,6 +1426,17 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 	local cs = getcallingscript()
 
 	if not checkcaller() then
+		if togs.AntiSpyCheck and v == "Transparency" and ns == "Head" and value > 1 then
+			if cs.Parent and cs.Parent.Name:find("Spy Watch") then
+				return value
+			end
+			return 0
+		end
+
+		if togs.AntiSpyCheck and v == "Unequipped" and ns:find("Spy Watch") then
+			return
+		end
+
 		if togs.SilentAim.Toggled and not togs.SilentAim.NoSpread and v == "Hit" and i == lp:GetMouse() and cs.Parent and cs.Parent:IsA("Tool") then
 			local c = ClosestToMouse()
 			local r = GetRandomPart(c)
@@ -1225,7 +1495,11 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 		end
 	end
 
-	if not cc and gnm == "FindPartOnRayWithIgnoreList" and togs.SilentAim.Toggled and togs.SilentAim.NoSpread and cs and cs.Parent and cs.Parent.IsA(cs.Parent,"Tool") and cs.IsA(cs,"LocalScript") then
+	if togs.AInfCapacity and gnm == "GetAttribute" and args[1] == "Ammo" or args[1] == "MaxAmmo" then
+		return math.huge
+	end
+
+	if togs.SilentAim.Toggled and not cc and gnm == "FindPartOnRayWithIgnoreList" and togs.SilentAim.NoSpread and cs and cs.Parent and cs.Parent.IsA(cs.Parent,"Tool") and cs.IsA(cs,"LocalScript") then
         local clos = ClosestToMouse()
         local part = GetRandomPart(clos)
         if clos and part then
@@ -1233,11 +1507,20 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
         end
     end
 
-	if gnm == "Destroy" and ns == "Humanoid" and togs.DCB then
+	if togs.AntiSpyCheck and gnm == "LoadAnimation" and ns == "Humanoid" and tostring(args[1]):find("SpyWatchIdle") then
 		return
 	end
 
-	if not cc and gnm == "Raycast" and cs and cs.Parent == game.ReplicatedStorage.Modules.TS and togs.SilentAim.Toggled then
+	if togs.HideItems and gnm == "FireServer" and ns == "WeaponBackEvent" then
+		args[1] = true
+		return nch(s,unpack(args))
+	end
+
+	if togs.DCB and gnm == "Destroy" and ns == "Humanoid" then
+		return
+	end
+
+	if togs.SilentAim.Toggled and not cc and gnm == "Raycast" and cs and cs.Parent == game.ReplicatedStorage.Modules.TS then
 		local clos = ClosestToMouse()
 		local part = GetRandomPart(clos)
 		return {Instance = part,Position = part.Position,Normal = Vector3.new(0,0,0)}
