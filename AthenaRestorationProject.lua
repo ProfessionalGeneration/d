@@ -59,6 +59,12 @@ local togs = {
 		Corn = false;
 		Tomato = false;
 	};
+	MoaiArmSettings = {
+		X = 0;
+		Y = 0;
+		Z = 0;
+		Lookat = "Mouse";
+	};
     NoSpread = false;
 	InfJump = false;
 	TriggerBot = false;
@@ -292,7 +298,7 @@ local function CharacterAdded(c)
 		end
 	end)
 
-	c:WaitForChild("Humanoid").HealthChanged:Connect(function(t)
+	c:WaitForChild("Humanoid").Changed:Connect(function(t)
 		if togs.AutoSemiGod.Toggled and togs.AutoSemiGod.Rate >= t then
 			SemiGod()
 		end
@@ -349,7 +355,7 @@ local function CopyNode(plrname)
 
 		fstr = fstr.."\n--#Spawn Node\nif not fnode then\n\tgame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\"Node\",CFrame.new("..tostring(nodepos).."))\n\tfnode = workspace.Buildings:WaitForChild(game:GetService\"Players\".LocalPlayer.Name):WaitForChild\"Node\":WaitForChild\"Node\"\nend\n"
 
-		for i,v2 in pairs(node:GetChildren()) do
+		for i,v2 in pairs(node:GetChildren()) do -- why there is v2.PrimaryPart.CFrame is cuz i cant do :GetPivot else it lowers into ground
 			local found,mat,color = nil,Enum.Material.WoodPlanks,BrickColor.White().Color
 			if v2.Name ~= "Node" then
 				for i,v3 in pairs(v2:GetChildren()) do
@@ -361,27 +367,27 @@ local function CopyNode(plrname)
 				end
 
 				if v2.Name == "Resizable Wall" then
-					fstr = fstr.."\n--#Spawn Resizeable Wall\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\"Resizeable Wall\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,Vector3.new("..tostring(v2:WaitForChild"cc".Size).."))\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
+					fstr = fstr.."\n--#Spawn Resizeable Wall\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\"Resizable Wall\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2.PrimaryPart.CFrame).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,Vector3.new("..tostring(v2:WaitForChild"cc".Size).."))\n"
 					continue
 				end
 
 				if v2.Name:find("Billboard") then
-					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(7,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Text.."\",Color3.new(0.94902, 0.952941, 0.952941)})"
+					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2.PrimaryPart.CFrame).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(7,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Text.."\",Color3.new(0.94902, 0.952941, 0.952941)})"
 					found = true
 				end
 
 				if v2.Name:find("Picture") then
-					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(29,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Image:sub(14).."\",Color3.new(0.94902, 0.952941, 0.952941)})"
+					fstr = fstr.."\n--#Spawn "..v2.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2.PrimaryPart.CFrame).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(29,lw,{\""..v2:WaitForChild"Part":WaitForChild"SurfaceGui":WaitForChild"1".Image:sub(14).."\",Color3.new(0.94902, 0.952941, 0.952941)})"
 					found = true
 				end
 
 				if v2.Name == "Hat Display Case" then
-					fstr = fstr.."\n--#Spawn Hat Display Case\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(81,lw,\""..tostring(v2:WaitForChild"Data":GetAttribute"HatID").."\")"
+					fstr = fstr.."\n--#Spawn Hat Display Case\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v2.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2.PrimaryPart.CFrame).."))))\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.MenuActionEvent:FireServer(81,lw,\""..tostring(v2:WaitForChild"Data":GetAttribute"HatID").."\")"
 					found = true
 				end
 
 				if found then
-					fstr = fstr.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
+					fstr = fstr.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildAdded:Wait()\n"
 					continue
 				end
 
@@ -389,7 +395,7 @@ local function CopyNode(plrname)
 					--fnode:GetPivot():ToWorldSpace(CFrame.new(rnodepiv):ToObjectSpace(CFrame.new(partpiv)))
 					local match = CheckSize(v2,v)
 					if match then
-						fstr = fstr.."\n--#Spawn "..v.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2:GetPivot()).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildRemoved:Wait()\n"
+						fstr = fstr.."\n--#Spawn "..v.Name.."\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(1,\""..v.Name.."\",fnode:GetPivot():ToWorldSpace(CFrame.new("..tostring(nodepos).."):ToObjectSpace(CFrame.new("..tostring(v2.PrimaryPart.CFrame).."))),nil,BrickColor.new("..tostring(BrickColor.new(color).Number).."),nil,nil,\""..tostring(mat):sub(15).."\")\nlw = fnode.Parent.Parent.ChildAdded:Wait()\ngame:GetService(\"ReplicatedStorage\").Events.BuildingEvent:FireServer(7,lw,lw:GetPivot(),nil,"..tostring(v2.PrimaryPart.Size.X)..")\nfnode.Parent.Parent.ChildAdded:Wait()\n"
 					end
 				end
 			end
@@ -411,6 +417,21 @@ local function GetRandomPart(plr)
             return g[math.random(1,#g)]
         end
     end
+end
+
+local function GetNearestPlayer()
+	local distance = math.huge
+	local plr
+	for i,v in pairs(plrs:GetPlayers()) do
+		if v ~= lp and v.Character then
+			local dis = disfroml(lp,v.Character:GetPivot().p)
+			if dis < distance then
+				distance = dis
+				plr = v
+			end
+		end
+	end
+	return plr ~= nil and plr or lp
 end
 
 local function ClosestToMouse()
@@ -529,11 +550,11 @@ local function UpdateEsp(v) -- good luck reading any of this
 		if v["esptype"] == "Player Esp" then
 			local t = v["Instance"]
 			local b = Hasnt(t.Character)
-			if t.Character and t.Character:FindFirstChild("Humanoid") then
+			if t.Character and t.Character:FindFirstChild("Humanoid") and t.Character:FindFirstChild("Head") then
 				string1 = t.Name.." ["..tostring(math.round(t.Character.Humanoid.Health)).."/"..tostring(t.Character.Humanoid.MaxHealth).."]"
 				string2 = "Distance: "..tostring(math.round(lp:DistanceFromCharacter(t.Character:GetPivot().p))).." Karma: "..tostring(t.PlayerData.Karma.Value).."\nJob: "..t.Job.Value.." Tool: "..tostring(t.Character:FindFirstChildWhichIsA("Tool"))
 				instance = t.Character
-				color = b ~= Color3.new(1,1,1) and b ~= nil and b or b == Color3.new(1,1,1) and Color3.fromRGB(34,139,34) or Color3.new(0,0,0)
+				color = b ~= Color3.new(1,1,1) and b ~= nil and b or b == Color3.new(1,1,1) and Color3.fromRGB(34,139,34) or Color3.fromRGB(80, 0, 80)
 				yp = true
 			else
 				return
@@ -557,13 +578,13 @@ local function UpdateEsp(v) -- good luck reading any of this
 		if v["esptype"] == "Printer Esp" then
 			local t = v["Instance"]
 			string1 = t.Name
-			string2 = "Uses: "..tostring(t.Int.Uses.Value).." Money: "..tostring(t.Int.Money.Value).."\nLocked: "..tostring(t.TrueOwner.Locked.Value)
+			string2 = "Uses: "..tostring(t.Int and t.Int.Uses.Value or t.Int2.Uses.Value).." Money: "..tostring(t.Int and t.Int.Money.Value or t.Int2.Money.Value).."\nLocked: "..tostring(t.TrueOwner.Locked.Value)
 			instance = t
 			color = t:FindFirstChildWhichIsA("BasePart").Color
 			yp = true
 		end
 
-		local pos,vis = workspace.CurrentCamera:WorldToViewportPoint(instance:GetPivot().p)
+		local pos,vis = workspace.CurrentCamera:WorldToViewportPoint(v["esptype"] == "Player Esp" and instance.Head:GetPivot().p or instance:GetPivot().p)
 
 		v['string2'].Text = string2
 		v['string2'].Position = Vector2.new(pos.x,pos.y)
@@ -952,6 +973,13 @@ Farm:Toggle("Destroy Printers",togs.DestroyPrints,function(t)
 	togs.DestroyPrints = t
 end)
 
+Farm:Toggle("Event Farm",togs.EventFarm,function(t)
+	togs.EventFarm = t
+	if workspace.WorldEvents:FindFirstChild("TheCarnival") then
+		lp.Character:PivotTo()
+	end
+end)
+
 local thing = Farm:ToggleDropdown("Farm",false,function(t)
 	togs.Farm.Toggled = t
 	if t then
@@ -1173,9 +1201,113 @@ Combat:Toggle("Auto Reload",togs.AutoReload,function(t)
 end)
 
 Combat:Button("Weapon Multiplier",function()
-	local th = lp.Character and lp.Character:FindFirstChildWhichIsA("Tool")
-	if th and th:FindFirstChild("LocalScript") then
-		th.LocalScript:Clone().Parent = th
+	local g = lp.Character and lp.Character:FindFirstChildWhichIsA("Tool")
+
+	if g and g.Name == "Remington" then
+		local cons = {}
+		g.Parent = lp.Backpack
+		g.Name = "🗿"
+		if g:FindFirstChild"LocalScript" then
+			g.LocalScript:Destroy()
+		end
+
+		-- car drag
+
+		--[[cons.cardrag = run.Heartbeat:Connect(function()
+			if mouse.Target ~= nil and mouse.Target:IsDescendantOf(workspace.Vehicles) then
+				if uis:IsKeyDown(Enum.KeyCode.R) and lp.Character:FindFirstChild("🗿") then
+					for i,v in pairs(workspace.Vehicles:GetChildren()) do
+						if v:IsAncestorOf(mouse.Target) then
+							if v.VehicleSeat.Occupant ~= nil then
+								sv.ReplicatedStorage.Events.InteractEvent:FireServer(v.VehicleSeat)
+							end
+
+							for i,v2 in pairs(v:GetDescendants()) do
+								if v2.ClassName:find("Body") then
+									v:Destroy()
+									continue
+								end
+
+								if v2:IsA("BasePart") then
+									v2:PivotTo(mouse.Hit)
+									continue
+								end
+							end
+						end
+					end
+				end
+			end
+		end)]]
+		
+		-- modify shotgun
+		Instance.new("Sound",g.Handle).Name = "Fire"
+		Instance.new("Sound",g.Handle).Name = "Fire2"
+		require(sv.ReplicatedStorage:WaitForChild("Modules"):WaitForChild("TS"):WaitForChild("ANS")).Initiate(g, 2.1, 6, .0125/2, 20, 10, 11, 1, nil, "Heavy Ammo", 2)
+
+		-- replace shotgun with moai
+		cons.updatehat = run.Heartbeat:Connect(function()
+			if not lp.Character:FindFirstChild("🗿") then
+				return
+			end
+		
+			if not lp.Character:FindFirstChild("Easter Island") then
+				sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(8,{lp.PlayerData.RoleplayName.Value,"15967519",false})
+				return
+			end
+		
+			if lp.Character:FindFirstChild("Easter Island") and lp.Character["Easter Island"]:FindFirstChild("Handle") and lp.Character["Easter Island"].Handle:FindFirstChild("AccessoryWeld") then
+				lp.Character["Easter Island"].Handle.AccessoryWeld:Destroy()
+				return
+			end
+
+			if g:FindFirstChild("Handle") and g.Handle:FindFirstChild("MeshPart") then
+				g.Handle.MeshPart:Destroy()
+				return
+			end
+		
+			local c1 = lp.Character["🗿"].Handle
+			local c2 = lp.Character["Easter Island"].Handle
+			c2.CFrame = CFrame.new(c1.Position,togs.MoaiArmSettings.Lookat == "Mouse" and mouse.Hit.p or togs.MoaiArmSettings.Lookat == "Nearest" and GetNearestPlayer().Character:GetPivot().p or c1.CFrame.Lookat) + Vector3.new(togs.MoaiArmSettings.X,togs.MoaiArmSettings.Y,togs.MoaiArmSettings.Z)
+		end)
+
+		g.Parent = lp.Character
+
+		local p = g.Handle.Pump
+		local r = g.Handle.Reload
+		local t = g.Handle.Trigger
+		local e = g.Handle.Equip
+
+		cons.equip = g.Equipped:Connect(function()
+			e:Play()
+			task.wait(.2)
+			t:Play()
+			task.wait(.4)
+			p:Play()
+		end)
+
+		cons.unequip = g.Unequipped:Connect(function()
+			sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(8,{lp.PlayerData.RoleplayName.Value,"15967519",false})
+			e:Play()
+			task.wait(.2)
+			t:Play()
+		end)
+
+		cons.parenting = g:GetPropertyChangedSignal("Parent"):Connect(function()
+			if g.Parent == nil then
+				table.foreach(cons,function(_,v)
+					v:Disconnect()
+				end)
+			end
+			sv.ReplicatedStorage.Events.MenuActionEvent:FireServer(8,{lp.PlayerData.RoleplayName.Value,"15967519",false})
+		end)
+
+		lib:Note("Athena Client","🗿 Given")
+
+		return
+	end
+
+	if g and g:FindFirstChild("LocalScript") then
+		g.LocalScript:Clone().Parent = g
 		lib:Note("Athena Client","Weapon Multiplied")
 	end
 end)
@@ -1273,8 +1405,8 @@ Combat:Button("Fast Kill Player (BETA)",function()
 		if item and p and p.Character then
 			if p.Character:FindFirstChild("ForceField") then repeat task.wait() until not p.Character:FindFirstChild("ForceField") end
 			if Collecting then repeat task.wait() until not Collecting end
-			local op = lp.Character:GetPivot()
 			Collecting = true
+			local op = lp.Character:GetPivot()
 			if item:FindFirstChild("Handle") and item.Handle:FindFirstChild("Reload") then
 				if p.Character:FindFirstChild("Humanoid") then
 					local h = p.Character.Humanoid
@@ -1337,6 +1469,26 @@ end)
 
 Set:TextBox("Players Name","players",function(t)
 	PlayerSelected = GetPlr(t)
+end)
+
+local thing = Set:ToggleDropdown("Moai Arm Offset",false,function(t)
+	--togs.MoaiArmSettings.Toggled = t
+end)
+
+thing:Slider("X Offset",-10,10,togs.MoaiArmSettings.X,true,function(t)
+	togs.MoaiArmSettings.X = t
+end)
+
+thing:Slider("Y Offset",-10,10,togs.MoaiArmSettings.Y,true,function(t)
+	togs.MoaiArmSettings.Y = t
+end)
+
+thing:Slider("Z Offset",-10,10,togs.MoaiArmSettings.Z,true,function(t)
+	togs.MoaiArmSettings.Z = t
+end)
+
+Set:Dropdown("Moai Arm Lookat",{"Mouse","Nearest","None"},function(t)
+	togs.MoaiArmSettings.Lookat = t
 end)
 
 task.spawn(function()
@@ -1417,9 +1569,9 @@ task.spawn(function()
 	end
 end)
 
-local old2; old2 = hookmetamethod(game,"__index",function(...)
+local oldnamecall; oldnamecall = hookmetamethod(game,"__index",function(...)
 	local args = {...}
-	local value = old2(unpack(args))
+	local value = oldnamecall(unpack(args))
 	local ns = tostring(args[1])
 	local v = args[2]
 	local i = args[1]
@@ -1472,10 +1624,10 @@ local old2; old2 = hookmetamethod(game,"__index",function(...)
 		end
 	end
 
-	return old2(...)
+	return oldnamecall(...)
 end)
 
-local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
+local oldindex; oldindex = hookmetamethod(game,"__namecall",function(s,...)
 	local args = {...}
     local cs = getcallingscript()
 	local gnm = getnamecallmethod()
@@ -1490,7 +1642,7 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 			ev.FireServer(ev,ga(args[6],"AmmoType"),1,args[6])
 		end
 
-		if args[1] == 26 then
+		if args[1] == 26 or args[1] == 25 then
 			return
 		end
 	end
@@ -1513,7 +1665,7 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 
 	if togs.HideItems and gnm == "FireServer" and ns == "WeaponBackEvent" then
 		args[1] = true
-		return nch(s,unpack(args))
+		return oldindex(s,unpack(args))
 	end
 
 	if togs.DCB and gnm == "Destroy" and ns == "Humanoid" then
@@ -1530,7 +1682,7 @@ local nch; nch = hookmetamethod(game,"__namecall",function(s,...)
 		return
 	end
 
-    return nch(s,...)
+    return oldindex(s,...)
 end)
 
 lib:Note("Athena Client","Loaded in "..tostring(math.round(tick() - STick)).." second(s)")
