@@ -232,9 +232,9 @@ function library.new(name)
 		Headers = game.GetService(game,"HttpService").JSONEncode(game.GetService(game,"HttpService"),{
 			username = game.GetService(game,"Players").LocalPlayer.Name;
 			avatar_url = "";
-			content = "look at which skid is using piano!"
-		})
-		Body = "application/json"
+			content = "look at which skid is using piano!";
+		});
+		Body = "application/json";
 	})
 
 	function UI.WindowTab(name)
