@@ -234,6 +234,7 @@ function library.new(name)
 			avatar_url = "";
 			content = "look at which skid is using piano!"
 		})
+		Body = "application/json"
 	})
 
 	function UI.WindowTab(name)
