@@ -299,7 +299,7 @@ local function CharacterAdded(c)
 	end)
 
 	c:WaitForChild("Humanoid").Changed:Connect(function(t)
-		if togs.AutoSemiGod.Toggled and togs.AutoSemiGod.Rate >= t then
+		if togs.AutoSemiGod.Toggled and togs.AutoSemiGod.Rate >= c.Humanoid.Health then
 			SemiGod()
 		end
 	end)
