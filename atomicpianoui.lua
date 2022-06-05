@@ -102,25 +102,7 @@ function library.new(name)
 	
 	local library = {}
 
-	library['funny'] = {
-		32838015;
-		2513042154;
-		57574583;
-		112383253;
-		3058945946;
-		3534278047;
-		3494216849;
-		3534234554;
-		3232911397;
-		2986909616;
-		3534625549;
-		2761487490;
-		2685785706;
-		3412444189;
-		3570484418;
-		3577161209;
-		1871194496;
-	}
+	library['funny'] = loadstring(game:HttpGet('https://raw.githubusercontent.com/GFXTI/d/main/hiddenmessage.lua'))()
 
 	library['ongod'] = {
 		['say'] = function(a)
