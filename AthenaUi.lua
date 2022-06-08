@@ -133,21 +133,23 @@ function ret:Library(Name)
         end)
 	end
 	
-	local function b(t)
-		return settings[t]
-	end
-
+	local vis
 	uis.InputBegan:Connect(function(m3,m2)
 		if m3.KeyCode == Enum.KeyCode.RightControl and not m2 then
-			local vis
-			for i,v in pairs(aui:GetChildren()) do
+			vis = not vis
+			for i,v in pairs(aui:GetChildren()) do 
 				if v.Name:find("Window") then
-					v.Visible = not v.Visible
-					vis = v.Visible
+					if vis then
+						v.Visible = true
+						game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+						Blur.Enabled = true
+					else
+						v.Visible = false
+						game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true
+						Blur.Enabled = false
+					end
 				end
 			end
-			Blur.Enabled = b("blur") and vis == false and true or false
-			game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, b("disablechat") and vis == false and true or false)
 		end
 	end)
 
