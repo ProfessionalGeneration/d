@@ -216,6 +216,7 @@ function ret:Library(Name)
 		Window1.Position = UDim2.new(-0.08,170*m, 0.0417177901, 0)
 		Window1.Size = UDim2.new(0, 160, 0, 274)
 		Window1.Active = false
+		Window1.Visible = false
 
 		UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(38, 38, 38)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(28, 28, 28))}
 		UIGradient.Rotation = 90
