@@ -133,7 +133,7 @@ function ret:Library(Name)
         end)
 	end
 	
-	local vis
+	local vis = false
 	uis.InputBegan:Connect(function(m3,m2)
 		if m3.KeyCode == Enum.KeyCode.RightControl and not m2 then
 			vis = not vis
