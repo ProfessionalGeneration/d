@@ -10,6 +10,10 @@ if game:GetService("CoreGui"):FindFirstChild("Athena ui Remake") then
 end
 
 local ret = {}
+local settings = {
+	blur = true;
+	disablechat = true;
+}
 
 function ret:Library(Name)
 	local ui = {}
@@ -30,6 +34,11 @@ function ret:Library(Name)
 	local textMessage = Instance.new("TextLabel")
 	local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
 	local Notifications = Instance.new("Frame")
+	local Blur = Instance.new("BlurEffect",game:GetService("Lighting"))
+
+	Blur.Name = "Athena Blur"
+	Blur.Enabled = false
+	Blur.Size = 24
 
 	Notifications.Name = "Notifications"
 	Notifications.Parent = aui
@@ -94,7 +103,7 @@ function ret:Library(Name)
 	ErrorSound.Volume = 0.28
 	ErrorSound.Parent = aui
 
-	draggable = function(obj)
+	local draggable = function(obj)
         task.spawn(function()
             local minitial
             local initial
@@ -124,13 +133,17 @@ function ret:Library(Name)
         end)
 	end
 
-	uis.InputBegan:Connect(function(m,m2)
-		if m.KeyCode == Enum.KeyCode.RightControl and not m2 then 
+	uis.InputBegan:Connect(function(m3,m2)
+		if m3.KeyCode == Enum.KeyCode.RightControl and not m2 then
+			local vis
 			for i,v in pairs(aui:GetChildren()) do
 				if v.Name:find("Window") then
 					v.Visible = not v.Visible
+					vis = v.Visible
 				end
 			end
+			Blur.Enabled = vis == false and settings.blur and vis or false
+			game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, vis == false and settings.disablechat and vis or false)
 		end
 	end)
 
@@ -1639,4 +1652,4 @@ function ret:Library(Name)
 	return ui
 end
 
-return ret
+return ret, settings
