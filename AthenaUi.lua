@@ -1649,7 +1649,7 @@ function ret:Library(Name)
 		resize()
 		return self
 	end
-	return ui
+	return ui, settings
 end
 
-return ret, settings
+return ret
