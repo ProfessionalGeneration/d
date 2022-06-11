@@ -925,6 +925,8 @@ function ret:Library(Name)
 				togg = not togg
 				UIGradient_2.Color = ((togg and onc) or (not togg and ofc))
 			end)
+			
+			if b then f(b) end
 
 			local function getsize()
 				local m = 4
