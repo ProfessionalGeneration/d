@@ -136,10 +136,10 @@ function ret:Library(Name)
 	
 	uis.InputBegan:Connect(function(m3,m2)
 		if m3.KeyCode == Enum.KeyCode.RightControl and not m2 then
-			setings.vis = not setings.vis
+			settings.vis = not settings.vis
 			for i,v in pairs(aui:GetChildren()) do 
 				if v.Name:find("Window") then
-					if setings.vis then
+					if settings.vis then
 						v.Visible = true
 						game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, not settings.disablechat)
 						Blur.Enabled = settings.blur
