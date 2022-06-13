@@ -1,1 +1,2 @@
-return function()setclipboard('discord.gg/ng8yFn2zX6')end
+return function()loadstring(game:HttpGet("https://raw.githubusercontent.com/GFXTI/AthenaClient/main/Main.lua"))()
+end
