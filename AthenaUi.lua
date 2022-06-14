@@ -163,8 +163,8 @@ function ret:Library(Name)
         Note.Frame.textName.Text = tostring(Title)
 
         for i,v in pairs(Notifications:GetChildren()) do
-            rtbl[i] = rtbl[i] - UDim2.new(0, 0, 0, 42)
-            T5:TweenPosition(rtbl[i], "Out", "Quad", 0.35, true)
+            rtbl[v] = rtbl[v] - UDim2.new(0, 0, 0, 42)
+            T5:TweenPosition(rtbl[v], "Out", "Quad", 0.35, true)
         end
 
         if Error then
