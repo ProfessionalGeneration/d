@@ -162,16 +162,9 @@ function ret:Library(Name)
         Note.Frame.textMessage.Text = tostring(Message)
         Note.Frame.textName.Text = tostring(Title)
 
-        local T1, T2, T3 = pairs(Notifications:GetChildren())
-
-        while true do
-            local T4, T5 = T1(T2, T3)
-            if not T4 then
-                break
-            end
-            T3 = T4
-            rtbl[T5] = rtbl[T5] - UDim2.new(0, 0, 0, 42)
-            T5:TweenPosition(rtbl[T5], "Out", "Quad", 0.35, true)
+        for i,v in pairs(Notifications:GetChildren()) do
+            rtbl[i] = rtbl[i] - UDim2.new(0, 0, 0, 42)
+            T5:TweenPosition(rtbl[i], "Out", "Quad", 0.35, true)
         end
 
         if Error then
