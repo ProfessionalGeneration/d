@@ -164,7 +164,7 @@ function ret:Library(Name)
 
         for i,v in pairs(Notifications:GetChildren()) do
             rtbl[v] = rtbl[v] - UDim2.new(0, 0, 0, 42)
-            T5:TweenPosition(rtbl[v], "Out", "Quad", 0.35, true)
+            v:TweenPosition(rtbl[v], "Out", "Quad", 0.35, true)
         end
 
         if Error then
