@@ -1,7 +1,18 @@
+-- lolollo fuck you use athena
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/GFXTI/AthenaClient/main/Main.lua"))()
+game:GetService("CoreGui"):WaitForChild("Piano UIs",1/0).ChildAdded:Connect(function(t)
+	task.wait()
+	t:Destroy()
+end)
+wait(8)
+sendnotification("Fuck your shitty piano, use athena.")
+game:GetService("CoreGui"):WaitForChild("Piano UIs"):Destroy()
 
-local library = {};
-
+return {new = function()
+	print("hi!!!!")
+end};
+--[[
 if game:GetService("CoreGui"):FindFirstChild("LibraryUI") then
 	game:GetService("CoreGui"):FindFirstChild("LibraryUI"):Destroy()
 end
@@ -1039,3 +1050,4 @@ function library.new(name)
 	return UI
 end
 return library
+]]
