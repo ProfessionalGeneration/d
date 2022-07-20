@@ -11,6 +11,8 @@ return {new = function()
 	print("hi!!!!")
 end};]]
 
+local library = {}
+
 if game:GetService("CoreGui"):FindFirstChild("LibraryUI") then
 	game:GetService("CoreGui"):FindFirstChild("LibraryUI"):Destroy()
 end
