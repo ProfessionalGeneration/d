@@ -1050,4 +1050,3 @@ function library.new(name)
 	return UI
 end
 return library
-]]
