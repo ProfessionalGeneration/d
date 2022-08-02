@@ -3,7 +3,8 @@ local lp = game:GetService("Players").LocalPlayer
 
 local blacklist = {
 	"zako125",
-	"evilsenate"
+	"evilsenate",
+	"RevenantAzraellius"
 }
 
 if table.find(blacklist, lp.Name) then
