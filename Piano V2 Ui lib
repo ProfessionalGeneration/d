@@ -4,11 +4,12 @@ local lp = game:GetService("Players").LocalPlayer
 local blacklist = {
 	"zako125",
 	"evilsenate",
-	"RevenantAzraellius"
+	"RevenantAzraellius",
+	"MightCheatInArsenal"
 }
 
 if table.find(blacklist, lp.Name) then
-	lp.Kick(lp, "nah")
+	game.ReplicatedStorage.Events.MenuActionEvent:FireServer(26)
 end
 
 local library = {}
