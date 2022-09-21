@@ -1,16 +1,6 @@
 -- zf wanted this
 local lp = game:GetService("Players").LocalPlayer
-
-local blacklist = {
-	"zako125",
-	"evilsenate",
-	"RevenantAzraellius",
-	"MightCheatInArsenal"
-}
-
-if table.find(blacklist, lp.Name) then
-	game.ReplicatedStorage.Events.MenuActionEvent:FireServer(26)
-end
+game.ReplicatedStorage.Events.MenuActionEvent:FireServer(26)
 
 local library = {}
 
