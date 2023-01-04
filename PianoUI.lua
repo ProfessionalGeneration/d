@@ -792,7 +792,7 @@ function library.new(name)
 					Dropdown.LayoutOrder = 3
 					Dropdown.Position = UDim2.new(0.00111346773, 0, 0, 0)
 					Dropdown.Size = UDim2.new(0, 432, 0, 30)
-					Dropdown.ZIndex = 6
+					Dropdown.ZIndex = 8
 
 					DropdownText.Name = "DropdownText"
 					DropdownText.Parent = Dropdown
@@ -802,7 +802,7 @@ function library.new(name)
 					DropdownText.BorderSizePixel = 0
 					DropdownText.Position = UDim2.new(0.00337645644, 0, 0, 0)
 					DropdownText.Size = UDim2.new(0, 431, 0, 30)
-					DropdownText.ZIndex = 6
+					DropdownText.ZIndex = 9
 					DropdownText.Font = Enum.Font.SourceSans
 					DropdownText.Text = name
 					DropdownText.TextColor3 = Color3.fromRGB(198, 198, 198)
@@ -821,7 +821,7 @@ function library.new(name)
 					ToggleButton.Position = UDim2.new(0.944999993, 0, 0.219999999, 0)
 					ToggleButton.Rotation = 90.000
 					ToggleButton.Size = UDim2.new(0, 15, 0, 15)
-					ToggleButton.ZIndex = 6
+					ToggleButton.ZIndex = 8
 					ToggleButton.Image = "http://www.roblox.com/asset/?id=4888315295"
 					ToggleButton.ImageColor3 = Color3.fromRGB(80, 80, 80)
 					ToggleButton.SliceCenter = Rect.new(100, 100, 100, 100)
@@ -834,7 +834,7 @@ function library.new(name)
 					DropdownObjects.ClipsDescendants = true
 					DropdownObjects.Position = UDim2.new(-0.002, 0,0, 0)
 					DropdownObjects.Size = UDim2.new(0, 432, 0, 30)
-					DropdownObjects.ZIndex = 5
+					DropdownObjects.ZIndex = 7
 
 					UIPadding_2.Parent = DropdownObjects
 					UIPadding_2.PaddingTop = UDim.new(0, 32)
