@@ -458,7 +458,7 @@ function library.new(name)
 							
 					local Mouse = game.Players.LocalPlayer:GetMouse()
 					Button.MouseButton1Click:Connect(function()
-						callback()
+						task.spawn(pcall, callback)
 						CircleClick(Button,Mouse.X,Mouse.Y)
 					end)
 					SectionUI:Resize()
@@ -527,7 +527,7 @@ function library.new(name)
 						    waitingForKeyPress = false
 						end
 						if not waitingForKeyPress and Input.KeyCode == currentKey and not j then
-							callback(Input.KeyCode or default)
+							task.spawn(pcall, callback, Input.KeyCode or callback)
 						end
 					end)
 					SectionUI:Resize()
@@ -590,7 +590,7 @@ function library.new(name)
 						
 					ToggleButton.MouseButton1Click:Connect(function()
 						Toggled = not Toggled
-						callback(Toggled)
+						task.spawn(pcall, callback, Toggled)
 						local Transparency = Toggled and 0 or 1
 						game:GetService("TweenService"):Create(ToggleButton,tweenInfo,{TextTransparency = Transparency}):Play()
 					end)
@@ -733,7 +733,7 @@ function library.new(name)
 							
 							game:GetService("TweenService"):Create(Fill,tweenInfo,{Size = UDim2.new(Percentage,0,0,4)}):Play()
 							Fade(ValueSlider,0)
-							callback(tonumber(ValueToNumber))
+							task.spawn(pcall, callback, tonumber(ValueToNumber))
 							SetSlider.Text = ValueToNumber
 						end);
 					end);
@@ -866,7 +866,7 @@ function library.new(name)
 						Button.TextSize = 20.000
 								
 						Button.MouseButton1Click:Connect(function()
-							callback(Button.Text)
+							task.spawn(pcall, callback, Button.Text)
 							DropdownText.Text = v
 							Toggled = false
 							DropdownObjects:TweenSize(UDim2.new(0, 432,0, 30),"In","Linear",.25,true)
