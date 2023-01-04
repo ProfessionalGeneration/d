@@ -835,7 +835,7 @@ function library.new(name)
 					DropdownObjects.ClipsDescendants = true
 					DropdownObjects.Position = UDim2.new(-0.002, 0,0, 0)
 					DropdownObjects.Size = UDim2.new(0, 432, 0, 30)
-					DropdownObjects.ZIndex = 7
+					DropdownObjects.ZIndex = 8
 
 					UIPadding_2.Parent = DropdownObjects
 					UIPadding_2.PaddingTop = UDim.new(0, 32)
@@ -858,7 +858,7 @@ function library.new(name)
 						Button.BorderColor3 = Color3.fromRGB(44, 44, 44)
 						Button.BorderSizePixel = 2
 						Button.Text = v
-						Button.ZIndex = 5
+						Button.ZIndex = 7
 						Button.Position = UDim2.new(0.269, 0, 1, 0)
 						Button.Size = UDim2.new(0, 430, 0, 30)
 						Button.AutoButtonColor = false
@@ -870,6 +870,7 @@ function library.new(name)
 							task.spawn(pcall, callback, Button.Text)
 							DropdownText.Text = v
 							Toggled = false
+							DropFrame.ZIndex = 6
 							DropdownObjects:TweenSize(UDim2.new(0, 432,0, 30),"In","Linear",.25,true)
 							game:GetService("TweenService"):Create(ToggleButton,tweenInfo,{Rotation = 90}):Play()
 						end)
