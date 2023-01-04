@@ -594,6 +594,7 @@ function library.new(name)
 						local Transparency = Toggled and 0 or 1
 						game:GetService("TweenService"):Create(ToggleButton,tweenInfo,{TextTransparency = Transparency}):Play()
 					end)
+					if default then task.spawn(pcall, callback, true) end
 					SectionUI:Resize()
 				end
 
