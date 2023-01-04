@@ -945,7 +945,7 @@ function library.new(name)
 					Box.FocusLost:Connect(function(Enter)
 						if Enter then
 							if Box.Text ~= nil or Box.Text ~= "" then
-								callback(Box.Text)
+								task.spawn(pcall, callback, Box.Text)
 							end
 						end
 					end)
