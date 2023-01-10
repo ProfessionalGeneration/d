@@ -936,7 +936,7 @@ function library.new(name)
 					Box.Font = Enum.Font.SourceSans
 					Box.PlaceholderText = val
 					Box.Text = ""
-					Box.TextColor3 = Color3.fromRGB(0, 0, 0)
+					Box.TextColor3 = Color3.new(.8,.8,.8)
 					Box.TextSize = 14.000
 					Box.TextXAlignment = Enum.TextXAlignment.Left
 					Box.ClipsDescendants = true
