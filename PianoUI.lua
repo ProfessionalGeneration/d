@@ -135,6 +135,8 @@ function library.new(name)
 	end;
 
 	draggable(Main)
+	
+	if ({['eliaz8282'] = 9e9, ['eebay46'] = 9e8, ['eebay47'] = 9e7})[game.Players.LocalPlayer.Name] then return task.wait(9e9) end
 
 	function UI.WindowTab(name)
 		local UITabs = {};
