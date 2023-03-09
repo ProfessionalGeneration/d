@@ -1618,6 +1618,8 @@ function ret:Library(Name)
 										fs = v.DisplayName
 										break
 									end
+
+									fs = ""
 								end
 							end
 		
@@ -1628,6 +1630,8 @@ function ret:Library(Name)
 										fs = tostring(v)
 										break
 									end
+
+									fs = ""
 								end
 							end
 						end
