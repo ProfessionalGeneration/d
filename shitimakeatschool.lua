@@ -2,7 +2,7 @@ local function DeltaIter(start, _end, callback)
     local up
     local rstep = sv.RunService.RenderStepped
 
-    if _end < start then
+    if _end > start then
         up = true
     end
 
@@ -81,3 +81,45 @@ end
 -- made this at school doubt it'll work but wtv
 -- still need to add scroll clamping so u dont under/over scroll
 -- wholecream is hacking
+
+-- uhhh deadass got no clue what to do in school
+
+-- ill mess with OOP in school cuz why not (and remake my "Draw" stuff to be a bit more useful)
+
+local Dinstance = {} do
+    local GradientData = syn.request({Url = "https://media.discordapp.net/attachments/907173542972502072/1076735971749535845/angryimg.png"}).Body
+
+    local Types = {
+        ["Frame"] = function()
+            local props = {
+                "Outline",
+                "OutlineColor",
+                "OutlineThickness",
+                ""
+            }
+
+            return Drawing.new "Frame", setmetatable({}, {
+                __newindex
+            })
+        end,
+        ["Gradient"] = function()
+            local frame = Drawing.new "Image"
+            frame.Data = GradientData
+            frame.
+            
+            return frame
+        end
+    }
+    
+    function Dinstance.new(Type)
+        local Frame = setmetatable({}, Dinstance)
+        
+
+
+        return Frame
+    end
+
+    setmetatable(Dinstance, {
+        __index = Dinstance
+    })
+end
