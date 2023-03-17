@@ -88,27 +88,71 @@ end
 
 local Dinstance = {} do
     local GradientData = syn.request({Url = "https://media.discordapp.net/attachments/907173542972502072/1076735971749535845/angryimg.png"}).Body
+    local function UpdateBox(props, frames)
+        local msize = frames.Main.Size or frames.Main.TextBounds or frames.Main.Radius or (frames.PointB - frames.PointD) -- ill add the uhh custom outline objects later ("Circle", "Quad", and other stuff)
+
+        do
+            frames.Outline.Visible = props.Outline and frames.Main.Visible
+            frames.Outline.Color = props.OutlineColor or Color3.new()
+            frames.Outline.Thickness = props.OutlineThickness
+            frames.Outline.Position = frames.Main.Position - Vector2.new(props.OutlineThickness, props.OutlineThickness)
+            frames.Outline.Size = msize + Vector2.new(props.OutlineThickness, props.OutlineThickness)
+            frames.Outline.ZIndex = frames.Main.ZIndex
+        end
+    end
 
     local Types = {
         ["Frame"] = function()
+            local frame = Drawing.new "Square"
+            local frames = {
+                ["Main"] = frame,
+                ["Outline"] = Drawing.new "Square"
+            }
             local props = {
-                "Outline",
-                "OutlineColor",
-                "OutlineThickness",
-                ""
+                ["Outline"] = false,
+                ["OutlineColor"] = Color3.new(),
+                ["OutlineThickness"] = 2,
             }
 
-            return Drawing.new "Frame", setmetatable({}, {
-                __newindex
+            frame.Filled = true
+
+            return frame, setmetatable({}, {
+                __newindex = function(_, k, v)
+                    if frame[k] then frame[k] = v return end
+                    props[k] = v
+
+                    UpdateBox(props, frames)
+                end,
+                __index = props
             })
         end,
         ["Gradient"] = function()
             local frame = Drawing.new "Image"
+            local frames = {
+                ["Main"] = frame,
+                ["Outline"] = Drawing.new "Square"
+            }
+            local props = {
+                ["Outline"] = false,
+                ["OutlineColor"] = Color3.new(),
+                ["OutlineThickness"] = 2,
+            }
+
             frame.Data = GradientData
-            frame.
+
+            return frame, setmetatable({}, {
+                __newindex = function(_, k, v)
+                    if frame[k] then frame[k] = v return end
+                    props[k] = v
+
+                    UpdateBox(props, frames)
+                end,
+                __index = props
+            })
             
             return frame
-        end
+        end,
+        [""]
     }
     
     function Dinstance.new(Type)
