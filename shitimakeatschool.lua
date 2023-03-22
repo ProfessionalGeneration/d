@@ -244,6 +244,11 @@ local Dinstance = {} do
         end
     }
 
+    for i,v in funcs do
+        Dinstance[i] = v
+        Dinstance[i:lower()] = v
+    end
+
     setmetatable(Dinstance, {
         __index = Dinstance
     })
