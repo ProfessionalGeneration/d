@@ -95,7 +95,12 @@ local Dinstance = {} do
             for i,v in frames do
                 if i == "Main" then continue end
 
-                if v.
+                v.Visible = props.Outline and frames.Main.Visible
+                v.Color = props.OutlineColor
+                v.Thickness = props.OutlineThickness
+                v.Position = frames.Main.Position
+                v.Radius = frames.Main.Radius + ((props.OutlineThickness / 2) * (i:find("In") and -1 or 1))
+                v.ZIndex = frames.Main.ZIndex
             end
             
             return
@@ -103,7 +108,7 @@ local Dinstance = {} do
         
         if table.find({"Image", "Square"}, tostring(frames.Main))
             frames.Outline.Visible = props.Outline and frames.Main.Visible
-            frames.Outline.Color = props.OutlineColor or Color3.new()
+            frames.Outline.Color = props.OutlineColor
             frames.Outline.Thickness = props.OutlineThickness
             frames.Outline.Position = frames.Main.Position - Vector2.new(props.OutlineThickness, props.OutlineThickness)
             frames.Outline.Size = msize + Vector2.new(props.OutlineThickness, props.OutlineThickness)
@@ -188,7 +193,7 @@ local Dinstance = {} do
     function Dinstance.new(Type)
         local Frame = setmetatable({}, Dinstance)
         
-
+        
 
         return Frame
     end
