@@ -91,7 +91,17 @@ local Dinstance = {} do
     local function UpdateBox(props, frames)
         local msize = frames.Main.Size or frames.Main.TextBounds or frames.Main.Radius or (frames.PointB - frames.PointD) -- ill add the uhh custom outline objects later ("Circle", "Quad", and other stuff)
 
-        do
+        if tostring(frames.Main) == "Circle" then
+            for i,v in frames do
+                if i == "Main" then continue end
+
+                if v.
+            end
+            
+            return
+        end
+        
+        if table.find({"Image", "Square"}, tostring(frames.Main))
             frames.Outline.Visible = props.Outline and frames.Main.Visible
             frames.Outline.Color = props.OutlineColor or Color3.new()
             frames.Outline.Thickness = props.OutlineThickness
@@ -118,7 +128,7 @@ local Dinstance = {} do
 
             return frame, setmetatable({}, {
                 __newindex = function(_, k, v)
-                    if frame[k] then frame[k] = v return end
+                    if frame[k] then frame[k] = v end
                     props[k] = v
 
                     UpdateBox(props, frames)
@@ -142,17 +152,37 @@ local Dinstance = {} do
 
             return frame, setmetatable({}, {
                 __newindex = function(_, k, v)
-                    if frame[k] then frame[k] = v return end
+                    if frame[k] then frame[k] = v end
                     props[k] = v
 
                     UpdateBox(props, frames)
                 end,
                 __index = props
             })
-            
-            return frame
         end,
-        [""]
+        ["Circle"] = function()
+            local frame = Drawing.new "Cirlce"
+            local frames = {
+                ["Main"] = frame,
+                ["OutlineIn"] = Drawing.new "Cirlce",
+                ["OutlineOut"] = Drawing.new "Circle"
+            }
+            local props = {
+                ["Outline"] = false,
+                ["OutlineColor"] = Color3.new(),
+                ["OutlineThickness"] = 2
+            }
+
+            return frame, setmetatable({}, {
+                __newindex = function(_, k, v)
+                    if frame[k] then frame[k] = v end
+                    props[k] = v
+
+                    UpdateBox(props, frames)
+                end,
+                __index = props
+            })
+        end
     }
     
     function Dinstance.new(Type)
