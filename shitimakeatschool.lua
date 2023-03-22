@@ -197,7 +197,9 @@ local Dinstance = {} do
 
         setmetatable(Metatable, {
             __newindex = function(t, k, v)
-                
+                if k == "Parent" then
+
+                end
 
                 RawNewIndex(t, k, v)
             end
@@ -205,6 +207,42 @@ local Dinstance = {} do
 
         return Metatable
     end
+
+    local funcs = {
+        ["Children"] = function(self, recursive)
+            local children = {}
+            
+            for _,v in self.__children do
+                table.insert(children, v)
+
+                if recursive then
+                    for __,obj in v:children(true) do
+                        table.insert(children, obj)
+                    end
+                end
+            end
+
+            return children
+        end,
+        ["Destroy"] = function(self)
+            for i,v in self.__frames do
+                v:Destroy()
+            end
+
+            for _,child in self:children() do
+                for __,v in child.__frames do
+                    v:Destroy()
+                end
+            end
+        end,
+        ["FindChild"] = function(self, name, recursive)
+            for i,v in self:children(recursive) do
+                if v.name == name then
+                    return v
+                end
+            end
+        end
+    }
 
     setmetatable(Dinstance, {
         __index = Dinstance
