@@ -116,6 +116,19 @@ local Dinstance = {} do
         end
     end
 
+    local newindex = function(t, k, v)
+        if k == "Position" then
+            for i,v in t.__children do
+                v.Position = v + (v.Position - t.frames.main.Position)
+            end
+        end
+
+        if t.frames.main[k] then t.frames.main[k] = v end
+        t.props[k] = v
+
+        UpdateBox(t.props, t.frames)
+    end
+
     local Types = {
         ["Frame"] = function()
             local frame = Drawing.new "Square"
@@ -128,17 +141,13 @@ local Dinstance = {} do
                 ["OutlineColor"] = Color3.new(),
                 ["OutlineThickness"] = 2,
             }
+            local children = {}
 
             frame.Filled = true
 
-            return frame, setmetatable({}, {
-                __newindex = function(_, k, v)
-                    if frame[k] then frame[k] = v end
-                    props[k] = v
-
-                    UpdateBox(props, frames)
-                end,
-                __index = props
+            return frame, setmetatable({["__children"] = children, ["__props"] = props, ["__frames"] = frames}, {
+                __index = props,
+                __newindex = newindex
             })
         end,
         ["Gradient"] = function()
@@ -152,17 +161,13 @@ local Dinstance = {} do
                 ["OutlineColor"] = Color3.new(),
                 ["OutlineThickness"] = 2,
             }
+            local children = {}
 
             frame.Data = GradientData
 
             return frame, setmetatable({}, {
-                __newindex = function(_, k, v)
-                    if frame[k] then frame[k] = v end
-                    props[k] = v
-
-                    UpdateBox(props, frames)
-                end,
-                __index = props
+                __index = props,
+                __newindex = newindex
             })
         end,
         ["Circle"] = function()
@@ -177,15 +182,11 @@ local Dinstance = {} do
                 ["OutlineColor"] = Color3.new(),
                 ["OutlineThickness"] = 2
             }
+            local children = {}
 
             return frame, setmetatable({}, {
-                __newindex = function(_, k, v)
-                    if frame[k] then frame[k] = v end
-                    props[k] = v
-
-                    UpdateBox(props, frames)
-                end,
-                __index = props
+                __index = props,
+                __newindex = newindex
             })
         end
     }
@@ -193,7 +194,7 @@ local Dinstance = {} do
     function Dinstance.new(Type)
         local Frame = setmetatable({}, Dinstance)
         
-        
+
 
         return Frame
     end
