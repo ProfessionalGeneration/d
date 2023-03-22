@@ -192,11 +192,18 @@ local Dinstance = {} do
     }
     
     function Dinstance.new(Type)
-        local Frame = setmetatable({}, Dinstance)
-        
+        local Object, Metatable = Types[Type]()
+        local RawNewIndex = getrawmetatable(Metatable.__newindex)
 
+        setmetatable(Metatable, {
+            __newindex = function(t, k, v)
+                
 
-        return Frame
+                RawNewIndex(t, k, v)
+            end
+        })
+
+        return Metatable
     end
 
     setmetatable(Dinstance, {
