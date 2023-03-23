@@ -15,72 +15,9 @@ local function DeltaIter(start, _end, callback)
     callback(_bend)
 end
 
-local function Scrolling(frame, options)
-    local scrollbar = GetGradientBox(true)
-    local scrollbarsize = options.scrollbarsize or frame.Size.Y
-    local scrollposy = 0
-    options = options or {scrollamount = 10, paddingbottom = 0, scrollbar = true}
-
-    table.insert(cons, sv.UserInputService.InputChanged:Connect(function(a, b)
-        if b then return end
-
-        if a.UserInputType == Enum.UserInputType.MouseWheel and IsInFrame(frame, GetMousePosition()) and frame.Visible and frame.Opacity ~= 0 then
-            local up = a.Position.Z > 0
-
-            task.spawn(function() 
-                for _ = 1, options.scrollamount / 5 do
-                    
-                end
-            end)
-
-            for i,v in frame:children(true) do
-                if (table.find({"l", "ts", "s", "scrollbar"}, v.name) and v.parent == frame) then continue end
-
-                task.spawn(function()
-                    for _ = 1, options.scrollamount / 5 do
-                        v.Position += Vector2.new(0, (up and options.scrollamount or -options.scrollamount) / 5)
-                        if v.Position.Y <= frame.Position.Y or v.Position.Y + (typeof(v.Size) == "Vector2" and v.Size or v.TextBounds).Y >= frame.Position.Y + frame.Size.Y - options.paddingbottom then
-                            v.Visible = false
-
-                            for _, v2 in v:children(true) do
-                                v2.Visible = false
-                            end
-                        end
-
-                        if v.Position.Y > frame.Position.Y and v.Position.Y + (typeof(v.Size) == "Vector2" and v.Size or v.TextBounds).Y < frame.Position.Y + frame.Size.Y - options.paddingbottom then
-                            v.Visible = true
-
-                            for _, v2 in v:children(true) do
-                                v2.Visible = true
-                            end
-                        end
-
-                        task.wait()
-                    end
-                end)
-            end
-        end
-    end))
-
-    if options.scrollbar then
-        scrollbar.ZIndex = frame.ZIndex + 1
-        scrollbar.Position = frame.Position + Vector2.new(frame.Size.X - 5, frame.Position.Y - 1)
-        scrollbar.Size = Vector2.new(4, scrollbarsize / frame.Size.Y)
-        scrollbar.parent = frame
-        scrollbar.name = "scrollbar"
-
-        Box(scrollbar, frame.ZIndex + 1)
-    end
-
-    return function(newsettings) -- update func
-        scrollbar.Size = Vector2.new(4, (newsettings.scrollbarsize or 400) / frame.Size.Y)
-        options = newsettings
-    end
-end
-
 -- made this at school doubt it'll work but wtv
 -- still need to add scroll clamping so u dont under/over scroll
--- wholecream is hacking
+-- wholecream is hacking (how he so good at drawing)
 
 -- uhhh deadass got no clue what to do in school
 
@@ -88,7 +25,13 @@ end
 
 local Dinstance = {} do
     local GradientData = syn.request({Url = "https://github.com/GFXTI/ProfessionalGeneration/blob/main/LibraryImages/angryimg.png?raw=true"}).Body
-    
+    local DraggableFrames, ScrollableFrames = {}, {}
+    local sv = {
+        uis = cloneref(game:service "UserInputService"),
+        core = cloneref(game:service "CoreGui"),
+        run = cloneref(game:service "RunService")
+    } -- Services if u couldn't tell (i dont wanna type it all out)
+
     local function GetFinalParent(frame)
         while frame.Parent do
             frame = frame.Parent
@@ -109,8 +52,32 @@ local Dinstance = {} do
         return parents
     end
 
-    local function UpdateBox(props, frames)
+    local function GetActualPosition(frame)
+
+    end
+
+    local function UpdateBox(props, frames) -- more of update than updatebox
         local msize = frames.Main.Size or frames.Main.TextBounds or frames.Main.Radius or (frames.PointB - frames.PointD) -- ill add the uhh custom outline objects later ("Circle", "Quad", and other stuff)
+
+        if props.Drag then
+            table.insert(DraggableFrames, frames.Main)
+        else
+            local Found = table.find(DraggableFrames, frames.Main)
+
+            if Found then
+                table.remove(DraggableFrames, Found)
+            end
+        end
+
+        if props.Scrolling then
+            table.insert(ScrollableFrames, frames.Main)
+        else
+            local Found = table.find(ScrollableFrames, frames.Main)
+
+            if Found then
+                table.remove(ScrollableFrames, Found)
+            end
+        end
 
         if tostring(frames.Main) == "Circle" then
             for i,v in frames do
@@ -146,7 +113,7 @@ local Dinstance = {} do
             end
 
             for i,v in t.__children do
-                v.Position = actualframepos + v.Position
+                v.Position = GetActualPosition(t.__.Frames) + v.Position
             end
         end
 
@@ -169,6 +136,16 @@ local Dinstance = {} do
             local children = {}
 
             frame.Filled = true
+
+            return frame, setmetatable({["__children"] = children, ["__props"] = props, ["__frames"] = frames}, {
+                __index = props,
+                __newindex = newindex
+            })
+        end,
+        ["Text"] = function()
+            local frame = Drawing.new "Text"
+            local props = {}
+            local children = {}
 
             return frame, setmetatable({["__children"] = children, ["__props"] = props, ["__frames"] = frames}, {
                 __index = props,
@@ -213,7 +190,7 @@ local Dinstance = {} do
                 __index = props,
                 __newindex = newindex
             })
-        end
+        end,
     }
     
     function Dinstance.new(Type)
@@ -281,7 +258,23 @@ local Dinstance = {} do
         Dinstance[i:lower()] = v
     end
 
-    setmetatable(Dinstance, {
-        __index = Dinstance
-    })
+    Dinstance.__index = Dinstance
+
+    sv.uis.InputBegan:Connect(function(input, ret) 
+        if ret then return end
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            for i,v in DraggableFrames do
+                if IsInFrame(v) then
+                    local _continue
+
+                    for _i, _v in v:children(true) do
+                        
+                    end
+
+                    if _continue then continue end
+                end
+            end
+        end
+    end)
 end
