@@ -53,7 +53,13 @@ local Dinstance = {} do
     end
 
     local function GetActualPosition(frame)
+        local pos = frame.Position
 
+        for i,v in GetParents(frame) do
+            pos += v.Position
+        end
+
+        return pos
     end
 
     local function UpdateBox(props, frames) -- more of update than updatebox
@@ -265,11 +271,15 @@ local Dinstance = {} do
 
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             for i,v in DraggableFrames do
-                if IsInFrame(v) then
+                if IsInFrame(v) and v.Opacity ~= 0 and v.Visible then
                     local _continue
 
                     for _i, _v in v:children(true) do
-                        
+                        if (_v.Active and IsInFrame(_v) and _v.Opacity ~= 0 and _v.Visible) then
+                            _continue = true
+                            
+                            break
+                        end
                     end
 
                     if _continue then continue end
