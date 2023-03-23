@@ -89,10 +89,28 @@ end
 local Dinstance = {} do
     local GradientData = syn.request({Url = "https://github.com/GFXTI/ProfessionalGeneration/blob/main/LibraryImages/angryimg.png?raw=true"}).Body
     
+    local function GetFinalParent(frame)
+        while frame.Parent do
+            frame = frame.Parent
+        end
+
+        return frame
+    end
+
+    local function GetParents(frame)
+        local parents = {}
+
+        while frame.Parent do
+            frame = frame.Parent
+
+            table.insert(parents, frame)
+        end
+
+        return parents
+    end
+
     local function UpdateBox(props, frames)
         local msize = frames.Main.Size or frames.Main.TextBounds or frames.Main.Radius or (frames.PointB - frames.PointD) -- ill add the uhh custom outline objects later ("Circle", "Quad", and other stuff)
-
-        frames.Main.Position = props.Parent and props.Parent.Position + props.Position or props.Position
 
         if tostring(frames.Main) == "Circle" then
             for i,v in frames do
@@ -120,18 +138,19 @@ local Dinstance = {} do
     end
 
     local newindex = function(t, k, v)
-        if t.frames.main[k] and k ~= "Position" then
-            t.frames.main[k] = v 
-        end
-
         if k == "Position" then
+            t.__frames.Main.Position = props.Parent and props.Parent.Position + props.Position or props.Position
+            local actualframepos = Vector2.zero
+            for i,v in GetParents(t.__frames.Main) do
+                actualframepos += v.Position
+            end
+
             for i,v in t.__children do
-                v.Position = t.frames.main.Position + v.Position
+                v.Position = actualframepos + v.Position
             end
         end
 
         t.props[k] = v
-
         UpdateBox(t.props, t.frames)
     end
 
