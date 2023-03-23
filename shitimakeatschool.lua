@@ -87,9 +87,12 @@ end
 -- ill mess with OOP in school cuz why not (and remake my "Draw" stuff to be a bit more useful)
 
 local Dinstance = {} do
-    local GradientData = syn.request({Url = "https://media.discordapp.net/attachments/907173542972502072/1076735971749535845/angryimg.png"}).Body
+    local GradientData = syn.request({Url = "https://github.com/GFXTI/ProfessionalGeneration/blob/main/LibraryImages/angryimg.png?raw=true"}).Body
+    
     local function UpdateBox(props, frames)
         local msize = frames.Main.Size or frames.Main.TextBounds or frames.Main.Radius or (frames.PointB - frames.PointD) -- ill add the uhh custom outline objects later ("Circle", "Quad", and other stuff)
+
+        frames.Main.Position = props.Parent and props.Parent.Position + props.Position or props.Position
 
         if tostring(frames.Main) == "Circle" then
             for i,v in frames do
@@ -117,13 +120,16 @@ local Dinstance = {} do
     end
 
     local newindex = function(t, k, v)
+        if t.frames.main[k] and k ~= "Position" then
+            t.frames.main[k] = v 
+        end
+
         if k == "Position" then
             for i,v in t.__children do
-                v.Position = v + (v.Position - t.frames.main.Position)
+                v.Position = t.frames.main.Position + v.Position
             end
         end
 
-        if t.frames.main[k] then t.frames.main[k] = v end
         t.props[k] = v
 
         UpdateBox(t.props, t.frames)
@@ -198,7 +204,14 @@ local Dinstance = {} do
         setmetatable(Metatable, {
             __newindex = function(t, k, v)
                 if k == "Parent" then
+                    if Metatable.__props.Parent then
+                        local oldparent = Metatable.__props.Parent.__children
+                        table.remove(oldparent, table.find(oldparent, Metatable))
 
+                        if v then
+                            table.insert(v.__children, Metatable)
+                        end
+                    end
                 end
 
                 RawNewIndex(t, k, v)
