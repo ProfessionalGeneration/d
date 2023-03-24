@@ -1,4 +1,6 @@
 -- hi advisory teacher 😀
+-- uhh to fill u in it basically a ui object base with parenting system
+
 -- made this at school with absolutely NO debugging (quite the challenge aint it)
 -- ill mess with OOP in school cuz why not (and remake my "Draw" stuff to be a bit more useful)
 
