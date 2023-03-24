@@ -1,26 +1,5 @@
-local function DeltaIter(start, _end, callback)
-    local up
-    local rstep = sv.RunService.RenderStepped
-
-    if _end > start then
-        up = true
-    end
-
-    while (up and _end < start) or (start < _end) do
-        start += rstep:wait() * (up and 1 or -1)
-        task.spawn(callback, start)
-    end
-
-    rstep:wait()
-    callback(_bend)
-end
-
--- made this at school doubt it'll work but wtv
--- still need to add scroll clamping so u dont under/over scroll
--- wholecream is hacking (how he so good at drawing)
-
--- uhhh deadass got no clue what to do in school
-
+-- hi advisory teacher 😀
+-- made this at school with absolutely NO debugging (quite the challenge aint it)
 -- ill mess with OOP in school cuz why not (and remake my "Draw" stuff to be a bit more useful)
 
 local Dinstance = {} do
