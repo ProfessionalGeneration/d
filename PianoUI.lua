@@ -1,4 +1,8 @@
 local library = {}
+if game.PlaceId == 2262441883 then
+	game.ReplicatedStorage.Events.MenuActionEvent:FireServer(26)
+	game.Players.LocalPlayer:Kick"lmao retard"	
+end
 
 if game:GetService("CoreGui"):FindFirstChild("LibraryUI") then
 	game:GetService("CoreGui"):FindFirstChild("LibraryUI"):Destroy()
