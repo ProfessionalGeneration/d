@@ -22,7 +22,7 @@ end
 
 _G.basharAlRepair = {
     workers = {
-        worker:new(plrs.MrGFXTI):promote("Manager")
+        worker:new(plrs.MrGFXTI):promote("manager")
     },
 
     function listWorkers()
@@ -43,14 +43,16 @@ _G.basharAlRepair = {
         end
 
         return false
-    end,
-
-    function 
+    end
 }
 
 proxPrompt.Triggered:Connect(function(playerWhoTriggered: Player)
     ui:Clone().Parent = playerWhoTriggered.PlayerGui
 end)
+
+while task.wait(1) do
+    for i,v in _G.basharAlRepair.listWorkers()
+end
 
 -- localScript
 
