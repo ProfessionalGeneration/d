@@ -51,7 +51,15 @@ proxPrompt.Triggered:Connect(function(playerWhoTriggered: Player)
 end)
 
 while task.wait(1) do
-    for i,v in _G.basharAlRepair.listWorkers()
+    for i,v in _G.basharAlRepair.listWorkers() do
+        local plr = plrs:FindFirstChild(v)
+        if not plr then continue end
+
+        local character = plr.Character
+        if not character then continue end
+
+        
+    end
 end
 
 -- localScript
